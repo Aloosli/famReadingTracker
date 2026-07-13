@@ -1,0 +1,307 @@
+import { fail, redirect } from '@sveltejs/kit';
+import { getUserById, updateMonthlyGoal, updateUserProfile } from '$lib/server/db/users';
+import { isAvatarColor, isAvatarEmoji } from '$lib/avatars';
+import { updateBookPageCount } from '$lib/server/db/books';
+import {
+	countFinishedThisMonth,
+	finishEntry,
+	getCurrentlyReading,
+	getFinishedShelf,
+	getReadingStreak,
+	getSetAside,
+	personalBestsForFinish,
+	removeEntry,
+	resumeEntry,
+	setAsideEntry,
+	setReaction,
+	startReading,
+	unfinishEntry
+} from '$lib/server/db/entries';
+import { isReaction } from '$lib/reactions';
+import { logProgress as saveProgress, checkInToday } from '$lib/server/db/sessions';
+import type { PositionType } from '$lib/server/db/types';
+import { evaluateTitles, revokeFinishDependentTitles } from '$lib/server/titles/engine';
+import { getPatchesForUser, setActiveTitle as applyActiveTitle } from '$lib/server/db/titles';
+import { getWishlist, removeFromWishlist as removeWishlistItem } from '$lib/server/db/wishlist';
+import type { Actions, PageServerLoad } from './$types';
+
+const PROFILE_COOKIE = 'profile_id';
+
+export const load: PageServerLoad = ({ cookies }) => {
+	const profileId = cookies.get(PROFILE_COOKIE);
+	const user = profileId ? getUserById(Number(profileId)) : undefined;
+	if (!user) {
+		redirect(302, '/');
+	}
+	return {
+		user,
+		currentlyReading: getCurrentlyReading(user.id),
+		streak: getReadingStreak(user.id),
+		finishedThisMonth: countFinishedThisMonth(user.id),
+		bookshelf: getFinishedShelf(user.id),
+		wishlist: getWishlist(user.id),
+		setAside: getSetAside(user.id),
+		patches: getPatchesForUser(user.id)
+	};
+};
+
+export const actions: Actions = {
+	switchProfile: async ({ cookies }) => {
+		cookies.delete(PROFILE_COOKIE, { path: '/' });
+		redirect(303, '/');
+	},
+	finishBook: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const entryId = Number(data.get('entryId'));
+		if (!entryId) {
+			return fail(400, { message: 'Missing book to finish.' });
+		}
+
+		finishEntry(entryId, user.id);
+		const bests = personalBestsForFinish(user.id, entryId);
+		const grants = evaluateTitles(user.id);
+		return { success: true, grants, bests };
+	},
+	unfinishBook: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const entryId = Number(data.get('entryId'));
+		if (!entryId) {
+			return fail(400, { message: 'Missing book to move back.' });
+		}
+
+		unfinishEntry(entryId, user.id);
+		revokeFinishDependentTitles(user.id);
+		return { success: true };
+	},
+	removeBook: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const entryId = Number(data.get('entryId'));
+		if (!entryId) {
+			return fail(400, { message: 'Missing book to remove.' });
+		}
+
+		removeEntry(entryId, user.id);
+		return { success: true };
+	},
+	setAsideBook: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const entryId = Number(data.get('entryId'));
+		if (!entryId) {
+			return fail(400, { message: 'Missing book to set aside.' });
+		}
+
+		setAsideEntry(entryId, user.id);
+		return { success: true };
+	},
+	resumeBook: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const entryId = Number(data.get('entryId'));
+		if (!entryId) {
+			return fail(400, { message: 'Missing book to resume.' });
+		}
+
+		resumeEntry(entryId, user.id);
+		return { success: true };
+	},
+	logProgress: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const bookId = Number(data.get('bookId'));
+		const positionType: PositionType = data.get('positionType') === 'percent' ? 'percent' : 'page';
+		const position = Number(data.get('position'));
+
+		if (!bookId || !Number.isFinite(position) || position < 0) {
+			return fail(400, { message: 'Enter a valid position.' });
+		}
+		if (positionType === 'percent' && position > 100) {
+			return fail(400, { message: 'Percent must be between 0 and 100.' });
+		}
+
+		saveProgress(user.id, bookId, Math.round(position), positionType);
+		const grants = evaluateTitles(user.id);
+		return { success: true, grants };
+	},
+	checkIn: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const bookId = Number(data.get('bookId'));
+		if (!bookId) {
+			return fail(400, { message: 'Missing book to check in.' });
+		}
+
+		checkInToday(user.id, bookId);
+		const grants = evaluateTitles(user.id);
+		return { success: true, grants };
+	},
+	updatePageCount: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const bookId = Number(data.get('bookId'));
+		const pageCountRaw = data.get('pageCount')?.toString().trim();
+		const pageCount = pageCountRaw && Number(pageCountRaw) > 0 ? Math.round(Number(pageCountRaw)) : null;
+
+		if (!bookId) {
+			return fail(400, { message: 'Missing book.' });
+		}
+
+		updateBookPageCount(bookId, pageCount);
+		return { success: true };
+	},
+	setActiveTitle: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const titleKey = data.get('titleKey')?.toString().trim() || null;
+		applyActiveTitle(user.id, titleKey);
+		return { success: true };
+	},
+	setMonthlyGoal: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const goal = Number(data.get('monthlyGoal'));
+		if (!Number.isFinite(goal) || goal < 1) {
+			return fail(400, { message: 'Pick a goal of at least 1 book.' });
+		}
+
+		updateMonthlyGoal(user.id, Math.round(goal));
+		return { success: true };
+	},
+	updateProfile: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const name = data.get('name')?.toString().trim();
+		const emoji = data.get('avatarEmoji')?.toString();
+		const color = data.get('avatarColor')?.toString();
+		const goalNumber = Number(data.get('monthlyGoal'));
+
+		if (!name) {
+			return fail(400, { message: 'Your name can’t be empty.' });
+		}
+
+		updateUserProfile(user.id, {
+			name,
+			avatarEmoji: isAvatarEmoji(emoji) ? emoji : user.avatar_emoji,
+			avatarColor: isAvatarColor(color) ? color : user.avatar_color,
+			monthlyGoal: Number.isFinite(goalNumber) && goalNumber >= 1 ? Math.round(goalNumber) : user.monthly_goal
+		});
+		return { success: true };
+	},
+	startFromWishlist: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const wishlistId = Number(data.get('wishlistId'));
+		if (!wishlistId) {
+			return fail(400, { message: 'Missing book.' });
+		}
+
+		// Remove from Up Next and move it onto the currently-reading shelf.
+		const bookId = removeWishlistItem(wishlistId, user.id);
+		if (bookId) {
+			startReading(user.id, bookId);
+		}
+		return { success: true };
+	},
+	removeFromWishlist: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const wishlistId = Number(data.get('wishlistId'));
+		if (!wishlistId) {
+			return fail(400, { message: 'Missing book to remove.' });
+		}
+
+		removeWishlistItem(wishlistId, user.id);
+		return { success: true };
+	},
+	setReaction: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const entryId = Number(data.get('entryId'));
+		const raw = data.get('reaction')?.toString() ?? '';
+		if (!entryId) {
+			return fail(400, { message: 'Missing book.' });
+		}
+
+		// An empty/"clear" value removes the reaction; otherwise it must be a known one.
+		const reaction = raw === '' ? null : isReaction(raw) ? raw : undefined;
+		if (reaction === undefined) {
+			return fail(400, { message: 'Unknown reaction.' });
+		}
+
+		setReaction(entryId, user.id, reaction);
+		return { success: true };
+	}
+};

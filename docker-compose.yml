@@ -1,0 +1,23 @@
+services:
+  reading-tracker:
+    build: .
+    image: famreadingtracker:latest
+    container_name: famreadingtracker
+    restart: unless-stopped
+    ports:
+      # host:container — Cloudflare Tunnel points at host port 3000.
+      - "3000:3000"
+    environment:
+      DATABASE_PATH: /data/reading-tracker.db
+      # Optional: a Google Books API key for higher lookup rate limits (read from .env).
+      GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
+      # REQUIRED behind Cloudflare Tunnel (or any HTTPS reverse proxy): the exact public URL the app
+      # is served from, e.g. https://reading.example.com — otherwise SvelteKit rejects POST form
+      # actions (add book, mark finished, setup) as cross-origin and the app looks broken.
+      ORIGIN: ${ORIGIN:-}
+    volumes:
+      # Named volume keeps the SQLite database across image rebuilds/updates.
+      - reading-data:/data
+
+volumes:
+  reading-data:

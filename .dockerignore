@@ -1,0 +1,27 @@
+# Rebuilt inside the image via `npm ci` / `npm run build`
+node_modules
+/build
+/.svelte-kit
+.output
+
+# Never bake local data or secrets into the image
+data
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+.env.*
+!.env.example
+
+# Repo cruft not needed for the build
+.git
+.gitignore
+.vscode
+.claude
+docs
+README.md
+*.md
+Dockerfile
+.dockerignore
+docker-compose.yml

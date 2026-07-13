@@ -1,0 +1,188 @@
+:root {
+	--color-bg: #f5ead9;
+	--color-bg-alt: #ede0cb;
+	--color-surface: #fffaf1;
+	--color-wood: #7a4f32;
+	--color-wood-dark: #5c3a24;
+	--color-text: #3d2b1f;
+	--color-text-muted: #7a6a5c;
+	--color-accent: #c97b4a;
+	--color-accent-hover: #b5673a;
+	--color-shadow: rgba(93, 64, 40, 0.18);
+	--color-border: #ddccb0;
+	--color-disabled: #d8c8b0;
+	--color-error: #a33;
+
+	--radius-lg: 28px;
+	--radius-md: 18px;
+	--radius-sm: 12px;
+
+	--font-heading: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+	--font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--color-bg: #1c1611;
+		--color-bg-alt: #241b14;
+		--color-surface: #2a2018;
+		--color-wood: #c9a27a;
+		--color-wood-dark: #e8c9a0;
+		--color-text: #ecdfd0;
+		--color-text-muted: #b3a08c;
+		--color-accent: #e0895a;
+		--color-accent-hover: #ec9a6e;
+		--color-shadow: rgba(0, 0, 0, 0.45);
+		--color-border: #4a3c2c;
+		--color-disabled: #3a2e21;
+		--color-error: #e07a7a;
+
+		color-scheme: dark;
+	}
+}
+
+:root[data-theme='dark'] {
+	--color-bg: #1c1611;
+	--color-bg-alt: #241b14;
+	--color-surface: #2a2018;
+	--color-wood: #c9a27a;
+	--color-wood-dark: #e8c9a0;
+	--color-text: #ecdfd0;
+	--color-text-muted: #b3a08c;
+	--color-accent: #e0895a;
+	--color-accent-hover: #ec9a6e;
+	--color-shadow: rgba(0, 0, 0, 0.45);
+	--color-border: #4a3c2c;
+	--color-disabled: #3a2e21;
+	--color-error: #e07a7a;
+
+	color-scheme: dark;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: var(--font-body);
+	color: var(--color-text);
+	background: radial-gradient(circle at top left, var(--color-bg-alt), var(--color-bg) 60%);
+	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: transparent;
+	overscroll-behavior: none;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}
+
+h1,
+h2,
+h3 {
+	font-family: var(--font-heading);
+	font-weight: 600;
+	margin: 0;
+}
+
+button {
+	font-family: inherit;
+}
+
+a {
+	color: var(--color-accent);
+}
+
+/* A gentle spring easing (settles with a tiny overshoot) reused for tactile motion. */
+:root {
+	--spring: linear(
+		0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849, 0.937 34.6%, 0.968,
+		0.991, 1.006 43.3%, 1.015 47.4%, 1.017, 1.015, 1.006, 1.001 63.1%, 0.998, 0.999, 1
+	);
+}
+
+/* ---- Tactile + motion polish (all opt-in on prefers-reduced-motion) ---- */
+@media (prefers-reduced-motion: no-preference) {
+	/* Buttons squish on press and spring back. `scale` composes with any existing transform. */
+	button {
+		transition: scale 0.32s var(--spring);
+	}
+	button:active {
+		scale: 0.96;
+		transition-duration: 0.09s;
+	}
+
+	/* Page cross-fade tuning; swipes override with a directional slide via [data-vt]. */
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation-duration: 0.3s;
+		animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	:root[data-vt='forward']::view-transition-old(root) {
+		animation-name: vt-out-left;
+	}
+	:root[data-vt='forward']::view-transition-new(root) {
+		animation-name: vt-in-right;
+	}
+	:root[data-vt='back']::view-transition-old(root) {
+		animation-name: vt-out-right;
+	}
+	:root[data-vt='back']::view-transition-new(root) {
+		animation-name: vt-in-left;
+	}
+
+	/* Staggered entrance for lists — add .rise-in and set --i on each item. */
+	.rise-in {
+		animation: rise-in 0.5s var(--spring) both;
+		animation-delay: calc(var(--i, 0) * 60ms);
+	}
+}
+
+@keyframes vt-out-left {
+	to {
+		transform: translateX(-28%);
+		opacity: 0;
+	}
+}
+@keyframes vt-in-right {
+	from {
+		transform: translateX(28%);
+		opacity: 0;
+	}
+}
+@keyframes vt-out-right {
+	to {
+		transform: translateX(28%);
+		opacity: 0;
+	}
+}
+@keyframes vt-in-left {
+	from {
+		transform: translateX(-28%);
+		opacity: 0;
+	}
+}
+@keyframes rise-in {
+	from {
+		opacity: 0;
+		transform: translateY(14px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/* Respect reduced-motion: keep everything instant. */
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none;
+	}
+}
