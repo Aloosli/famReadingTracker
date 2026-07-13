@@ -7,6 +7,37 @@
 
 	const isCurrentYear = $derived(data.year === String(new Date().getFullYear()));
 	const pagesLabel = $derived(data.totalPages.toLocaleString());
+
+	const MONTH_NAMES = [
+		'January',
+		'February',
+		'March',
+		'April',
+		'May',
+		'June',
+		'July',
+		'August',
+		'September',
+		'October',
+		'November',
+		'December'
+	];
+
+	// The year told in order: books grouped by finish month, January first, oldest first
+	// within a month (data.books arrives newest-first).
+	const months = $derived.by(() => {
+		const byMonth = new Map<number, PageData['books']>();
+		for (const book of data.books) {
+			const index = Number(book.finished_at.slice(5, 7)) - 1;
+			const key = index >= 0 && index < 12 ? index : 0;
+			const group = byMonth.get(key);
+			if (group) group.unshift(book);
+			else byMonth.set(key, [book]);
+		}
+		return [...byMonth.entries()]
+			.sort(([a], [b]) => a - b)
+			.map(([index, books]) => ({ name: MONTH_NAMES[index], books }));
+	});
 </script>
 
 <svelte:head>
@@ -34,25 +65,28 @@
 			{data.finishedCount === 1 ? 'book' : 'books'}.
 		</p>
 
-		<section class="stat-tiles">
-			<div class="stat-tile">
+		<p class="asterism" aria-hidden="true">⁂</p>
+
+		<section class="stat-strip">
+			<div class="stat">
 				<span class="stat-number">{data.finishedCount}</span>
 				<span class="stat-caption">{data.finishedCount === 1 ? 'book' : 'books'} finished</span>
 			</div>
 			{#if data.totalPages > 0}
-				<div class="stat-tile">
+				<div class="stat">
 					<span class="stat-number">{pagesLabel}</span>
 					<span class="stat-caption">pages read</span>
 				</div>
 			{/if}
-			{#if data.busiestMonth}
-				<div class="stat-tile">
+			<!-- With a single book these just repeat it — only meaningful from two on. -->
+			{#if data.busiestMonth && data.finishedCount > 1}
+				<div class="stat">
 					<span class="stat-number">{data.busiestMonth.name}</span>
 					<span class="stat-caption">busiest month · {data.busiestMonth.count}</span>
 				</div>
 			{/if}
-			{#if data.longest?.page_count}
-				<div class="stat-tile">
+			{#if data.longest?.page_count && data.finishedCount > 1}
+				<div class="stat">
 					<span class="stat-number">{data.longest.page_count.toLocaleString()}</span>
 					<span class="stat-caption">longest book · {data.longest.title}</span>
 				</div>
@@ -76,6 +110,36 @@
 			</section>
 		{/if}
 
+		<section class="story" style:--ribbon={data.user.avatar_color}>
+			<p class="section-label">The year, month by month</p>
+			<div class="timeline">
+				{#each months as month, i (month.name)}
+					<div class="month rise-in" style:--i={i}>
+						<p class="month-name">{month.name}</p>
+						<div class="month-books">
+							{#each month.books as book (book.id)}
+								<div
+									class="wall-book"
+									title={book.author ? `${book.title} — ${book.author}` : book.title}
+								>
+									{#if book.cover_url}
+										<img src={book.cover_url} alt={book.title} />
+									{:else}
+										<span class="wall-placeholder">{book.title}</span>
+									{/if}
+									{#if reactionEmoji(book.reaction)}
+										<span class="wall-reaction" aria-hidden="true"
+											>{reactionEmoji(book.reaction)}</span
+										>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/each}
+			</div>
+		</section>
+
 		{#if data.patches.length > 0}
 			<section class="patches">
 				<p class="section-label">Patches earned this year</p>
@@ -86,27 +150,6 @@
 				</div>
 			</section>
 		{/if}
-
-		<section class="wall">
-			<p class="section-label">Every book, {data.year}</p>
-			<div class="cover-wall">
-				{#each data.books as book (book.id)}
-					<div
-						class="wall-book"
-						title={book.author ? `${book.title} — ${book.author}` : book.title}
-					>
-						{#if book.cover_url}
-							<img src={book.cover_url} alt={book.title} />
-						{:else}
-							<span class="wall-placeholder">{book.title}</span>
-						{/if}
-						{#if reactionEmoji(book.reaction)}
-							<span class="wall-reaction" aria-hidden="true">{reactionEmoji(book.reaction)}</span>
-						{/if}
-					</div>
-				{/each}
-			</div>
-		</section>
 	{/if}
 </main>
 
@@ -201,18 +244,37 @@
 		margin: 0 0 0.9rem;
 	}
 
-	/* ---- Stat tiles ---- */
-	.stat-tiles {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		gap: 1rem;
+	/* ---- Title-page flourish ---- */
+	.asterism {
+		text-align: center;
+		margin: -0.9rem 0 -0.5rem;
+		font-size: 1.5rem;
+		color: var(--color-text-muted);
+		user-select: none;
 	}
 
-	.stat-tile {
-		background: var(--color-surface);
+	/* ---- Stat strip: one ruled artifact, not floating tiles. The 1px gap over a border-
+	   coloured background draws the hairline dividers in both directions when it wraps.
+	   fit-content keeps a sparse year (one or two stats) as a modest centred card. ---- */
+	.stat-strip {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1px;
+		width: fit-content;
+		max-width: 100%;
+		margin-inline: auto;
+		background: var(--color-border);
+		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
+		overflow: hidden;
 		box-shadow: 0 4px 12px var(--color-shadow);
-		padding: 1.25rem 1.1rem;
+	}
+
+	.stat {
+		flex: 1 1 150px;
+		min-width: 150px;
+		background: var(--color-surface);
+		padding: 1.25rem 1.6rem;
 		display: flex;
 		flex-direction: column;
 		gap: 0.3rem;
@@ -284,15 +346,75 @@
 		width: 104px;
 	}
 
-	/* ---- Cover wall ---- */
-	.cover-wall {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+	/* ---- The bookmark ribbon: a rail in the reader's own colour threads the months
+	   together and ends in a forked ribbon tail. ---- */
+	.timeline {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+		padding-left: 2.1rem;
+		padding-bottom: 1.6rem;
+	}
+
+	.timeline::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.2rem;
+		bottom: 0;
+		width: 10px;
+		background: var(--ribbon);
+		border-radius: 3px 3px 0 0;
+		box-shadow: inset -2px 0 3px rgba(0, 0, 0, 0.18);
+	}
+
+	.timeline::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: -14px;
+		width: 10px;
+		height: 15px;
+		background: var(--ribbon);
+		clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 52%, 0 100%);
+	}
+
+	.month {
+		position: relative;
+	}
+
+	/* A "stitch" across the ribbon marks each month. */
+	.month::before {
+		content: '';
+		position: absolute;
+		left: calc(-2.1rem - 3px);
+		top: 0.55rem;
+		width: 16px;
+		height: 5px;
+		border-radius: 3px;
+		background: var(--color-surface);
+		box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+	}
+
+	.month-name {
+		margin: 0 0 0.65rem;
+		font-family: var(--font-heading);
+		font-size: 1rem;
+		font-weight: 600;
+		letter-spacing: 0.06em;
+		color: var(--color-wood-dark);
+	}
+
+	.month-books {
+		display: flex;
+		flex-wrap: wrap;
 		gap: 1rem;
 	}
 
 	.wall-book {
 		position: relative;
+		width: 84px;
 		aspect-ratio: 2 / 3;
 	}
 
