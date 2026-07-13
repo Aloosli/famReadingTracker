@@ -30,6 +30,9 @@ ENV DATABASE_PATH=/data/reading-tracker.db
 COPY --from=build /app/build ./build
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
+# Ship the backup script so hosts can snapshot the DB via
+# `docker exec <container> node scripts/backup.mjs --db /data/reading-tracker.db --dest /data/backups`.
+COPY --from=build /app/scripts ./scripts
 
 # Run unprivileged. The built-in `node` user owns /data; with a named volume Docker preserves this
 # ownership, so the app can create and write the database.
