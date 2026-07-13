@@ -1,5 +1,7 @@
 # 📚 Family Reading Tracker
 
+[![CI](https://github.com/Aloosli/famReadingTracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Aloosli/famReadingTracker/actions/workflows/ci.yml)
+
 A cozy, self-hosted reading dashboard for the whole family. Everyone gets their own
 shelf, adds books by scanning a barcode or searching, tracks their progress, and
 quietly unlocks little surprise achievements along the way — all on a device in your
