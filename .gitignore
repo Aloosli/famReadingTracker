@@ -30,3 +30,6 @@ vite.config.ts.timestamp-*
 
 # Claude Code personal settings
 .claude/settings.local.json*
+
+# Automated backups (see scripts/backup.mjs)
+/backups/

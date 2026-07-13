@@ -113,6 +113,28 @@ Everything is optional.
 > ⚠️ Avoid editing the database file directly while the dev server is running — the WAL
 > means changes made by a second connection may not stick. Make changes through the app.
 
+### Automated backups
+
+`scripts/backup.mjs` takes a WAL-safe snapshot of the database (safe while the app is
+running), verifies it opens cleanly, writes it to `backups/` as one self-contained
+`.db` file per day, and deletes copies older than 14 days:
+
+```sh
+node scripts/backup.mjs            # defaults: data/reading-tracker.db → backups/, keep 14 days
+node scripts/backup.mjs --db /data/reading-tracker.db --dest /backups --keep 30
+```
+
+It exits instantly if today's backup already exists, so the recommended cron entry runs
+**hourly** — on a machine that isn't always on, the day's backup is taken whenever the
+machine happens to be awake instead of being missed at a fixed hour:
+
+```cron
+7 * * * * cd /path/to/famReadingTracker && /usr/bin/node scripts/backup.mjs >> backups/backup.log 2>&1
+```
+
+For extra safety, point `--dest` at (or periodically copy `backups/` to) a different
+disk or synced folder — a backup on the same machine doesn't survive the machine.
+
 ---
 
 ## Production deployment
