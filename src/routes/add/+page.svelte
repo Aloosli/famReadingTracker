@@ -6,8 +6,26 @@
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
-	const toWishlist = $derived(data.destination === 'wishlist');
-	const ctaLabel = $derived(toWishlist ? 'Add to Up Next' : 'Add to my shelf');
+	type Destination = 'reading' | 'finished' | 'wishlist';
+
+	const SHELVES: { value: Destination; label: string; cta: string }[] = [
+		{ value: 'reading', label: 'Reading now', cta: 'Add to my shelf' },
+		{ value: 'finished', label: "Already read", cta: 'Add as read' },
+		{ value: 'wishlist', label: 'Up Next', cta: 'Add to Up Next' }
+	];
+
+	// Seeded by the link that got here, but the reader can change it — the same book might be
+	// one they're starting, one they just finished, or one they're only planning.
+	// svelte-ignore state_referenced_locally
+	let destination: Destination = $state(data.destination as Destination);
+
+	// This component is reused when navigating between /add and /add?to=wishlist, so re-seed from
+	// the link instead of stranding the previous visit's choice.
+	$effect(() => {
+		destination = data.destination as Destination;
+	});
+
+	const ctaLabel = $derived(SHELVES.find((s) => s.value === destination)?.cta ?? 'Add to my shelf');
 
 	type Tab = 'scan' | 'search' | 'manual';
 	let tab: Tab = $state('scan');
@@ -95,12 +113,24 @@
 <main>
 	<header>
 		<a href="/home" class="back">&larr; Back</a>
-		<h1>{toWishlist ? 'Add to Up Next' : 'Add a book'} for {data.user.name}</h1>
+		<h1>Add a book for {data.user.name}</h1>
 	</header>
 
 	{#if form?.message}
 		<p class="error">{form.message}</p>
 	{/if}
+
+	<fieldset class="shelves">
+		<legend>Where does it go?</legend>
+		<div class="shelf-options">
+			{#each SHELVES as shelf (shelf.value)}
+				<label class="shelf" class:selected={destination === shelf.value}>
+					<input type="radio" name="shelf" value={shelf.value} bind:group={destination} />
+					{shelf.label}
+				</label>
+			{/each}
+		</div>
+	</fieldset>
 
 	<div class="tabs">
 		<button class:active={tab === 'scan'} onclick={() => switchTab('scan')}>Scan barcode</button>
@@ -124,7 +154,7 @@
 				{#if selected.author}<p class="author">{selected.author}</p>{/if}
 			</div>
 			<form method="POST" action="?/addBook" use:enhance>
-				<input type="hidden" name="destination" value={data.destination} />
+				<input type="hidden" name="destination" value={destination} />
 				<input type="hidden" name="title" value={selected.title} />
 				<input type="hidden" name="author" value={selected.author ?? ''} />
 				<input type="hidden" name="coverUrl" value={selected.coverUrl ?? ''} />
@@ -158,7 +188,7 @@
 			{:else if lookupState === 'not-found'}
 				<p class="hint">Couldn't find that one online. Add it by hand instead:</p>
 				<form method="POST" action="?/addBook" use:enhance>
-					<input type="hidden" name="destination" value={data.destination} />
+					<input type="hidden" name="destination" value={destination} />
 					<input type="hidden" name="isbn" value={scannedIsbn} />
 					<label>
 						Title
@@ -226,7 +256,7 @@
 	{:else}
 		<section class="panel">
 			<form method="POST" action="?/addBook" use:enhance>
-				<input type="hidden" name="destination" value={data.destination} />
+				<input type="hidden" name="destination" value={destination} />
 				<label>
 					Title
 					<input type="text" name="title" required bind:value={manualTitle} placeholder="Book title" />
@@ -284,6 +314,61 @@
 		color: var(--color-error);
 		font-weight: 600;
 		margin: 0;
+	}
+
+	.shelves {
+		border: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.shelves legend {
+		font-weight: 600;
+		font-size: 0.9rem;
+		color: var(--color-text-muted);
+		padding: 0;
+		margin-bottom: 0.4rem;
+	}
+
+	.shelf-options {
+		display: flex;
+		gap: 0.5rem;
+		background: var(--color-bg-alt);
+		padding: 0.35rem;
+		border-radius: var(--radius-md);
+	}
+
+	.shelf {
+		flex: 1;
+		text-align: center;
+		padding: 0.65rem 0.5rem;
+		border-radius: var(--radius-sm);
+		font-weight: 600;
+		font-size: 0.9rem;
+		color: var(--color-text-muted);
+		cursor: pointer;
+	}
+
+	.shelf.selected {
+		background: var(--color-surface);
+		color: var(--color-text);
+		box-shadow: 0 4px 10px var(--color-shadow);
+	}
+
+	/* The radio drives state and keeps the control keyboard- and screen-reader-navigable; the
+	   label is what's actually painted. */
+	.shelf input {
+		position: absolute;
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.shelf:focus-within {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
 	}
 
 	.tabs {

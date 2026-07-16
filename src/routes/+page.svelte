@@ -42,7 +42,7 @@
 </svelte:head>
 
 <main>
-	<h1>Who's reading tonight?</h1>
+	<h1>Who's reading today?</h1>
 	<p class="subtitle">Tap your shelf to settle in.</p>
 
 	{#if form?.message}

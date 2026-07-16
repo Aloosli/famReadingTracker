@@ -68,6 +68,42 @@ export function startReading(userId: number, bookId: number): ReadingEntryRow {
 	return db.prepare('SELECT * FROM reading_entries WHERE id = ?').get(result.lastInsertRowid) as ReadingEntryRow;
 }
 
+/**
+ * Records a book the reader has already read, without it ever passing through the shelf — the
+ * "I just finished this" path from Add. If the book is already open (actively reading or set
+ * aside), that entry is finished in place rather than duplicated, mirroring startReading. It
+ * counts as finished *now*, so it lands in today's streak and this month's goal.
+ * (A book that was already finished starts a fresh entry — that's a genuine re-read.)
+ */
+export function addAlreadyRead(userId: number, bookId: number): ReadingEntryRow {
+	const existing = db
+		.prepare(
+			`SELECT * FROM reading_entries
+			 WHERE user_id = ? AND book_id = ? AND status = 'reading'
+			 LIMIT 1`
+		)
+		.get(userId, bookId) as ReadingEntryRow | undefined;
+
+	if (existing) {
+		db.prepare(
+			`UPDATE reading_entries
+			 SET status = 'finished', finished_at = datetime('now'), set_aside_at = NULL
+			 WHERE id = ?`
+		).run(existing.id);
+		return db.prepare('SELECT * FROM reading_entries WHERE id = ?').get(existing.id) as ReadingEntryRow;
+	}
+
+	const result = db
+		.prepare(
+			`INSERT INTO reading_entries (user_id, book_id, status, started_at, finished_at)
+			 VALUES (?, ?, 'finished', datetime('now'), datetime('now'))`
+		)
+		.run(userId, bookId);
+	return db
+		.prepare('SELECT * FROM reading_entries WHERE id = ?')
+		.get(result.lastInsertRowid) as ReadingEntryRow;
+}
+
 /** Removes a currently-reading entry outright (not a status change) — scoped to the owning user. */
 export function removeEntry(entryId: number, userId: number): void {
 	db.prepare(`DELETE FROM reading_entries WHERE id = ? AND user_id = ? AND status = 'reading'`).run(

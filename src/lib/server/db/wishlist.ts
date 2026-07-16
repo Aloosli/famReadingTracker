@@ -31,6 +31,15 @@ export function getWishlist(userId: number): WishlistBook[] {
 		.all(userId) as WishlistBook[];
 }
 
+/**
+ * Drops a book from a reader's Up Next by book rather than by list id — for when it stops being
+ * "up next" as a side effect of landing on the shelf or being marked already read. No-ops if it
+ * was never listed.
+ */
+export function removeFromWishlistByBook(userId: number, bookId: number): void {
+	db.prepare('DELETE FROM wishlist WHERE user_id = ? AND book_id = ?').run(userId, bookId);
+}
+
 /** Removes an item from a reader's Up Next list — scoped to the owner. Returns its book_id. */
 export function removeFromWishlist(wishlistId: number, userId: number): number | null {
 	const row = db

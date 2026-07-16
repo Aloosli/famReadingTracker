@@ -1,11 +1,19 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { getUserById } from '$lib/server/db/users';
 import { findOrCreateBook } from '$lib/server/db/books';
-import { startReading } from '$lib/server/db/entries';
-import { addToWishlist } from '$lib/server/db/wishlist';
+import { startReading, addAlreadyRead } from '$lib/server/db/entries';
+import { addToWishlist, removeFromWishlistByBook } from '$lib/server/db/wishlist';
 import type { Actions, PageServerLoad } from './$types';
 
 const PROFILE_COOKIE = 'profile_id';
+
+/** Where an added book lands. The page lets the reader change this, so it is never trusted blindly. */
+const DESTINATIONS = ['reading', 'finished', 'wishlist'] as const;
+type Destination = (typeof DESTINATIONS)[number];
+
+function toDestination(value: string | null | undefined): Destination {
+	return DESTINATIONS.includes(value as Destination) ? (value as Destination) : 'reading';
+}
 
 export const load: PageServerLoad = ({ cookies, url }) => {
 	const profileId = cookies.get(PROFILE_COOKIE);
@@ -13,8 +21,8 @@ export const load: PageServerLoad = ({ cookies, url }) => {
 	if (!user) {
 		redirect(302, '/');
 	}
-	const destination = url.searchParams.get('to') === 'wishlist' ? 'wishlist' : 'reading';
-	return { user, destination };
+	// Only the initial selection — the page offers all three.
+	return { user, destination: toDestination(url.searchParams.get('to')) };
 };
 
 export const actions: Actions = {
@@ -43,10 +51,17 @@ export const actions: Actions = {
 			pageCount
 		});
 
-		if (data.get('destination') === 'wishlist') {
+		const destination = toDestination(data.get('destination')?.toString());
+		if (destination === 'wishlist') {
 			addToWishlist(user.id, book.id);
 		} else {
-			startReading(user.id, book.id);
+			// Reading it or having read it both settle the question of what's up next.
+			if (destination === 'finished') {
+				addAlreadyRead(user.id, book.id);
+			} else {
+				startReading(user.id, book.id);
+			}
+			removeFromWishlistByBook(user.id, book.id);
 		}
 
 		redirect(303, '/home');
