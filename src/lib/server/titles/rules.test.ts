@@ -154,6 +154,14 @@ describe('hasSameDayFinish', () => {
 	it('ignores books that are not finished', () => {
 		expect(hasSameDayFinish([finishedBook('2026-07-10 09:00:00', null)])).toBe(false);
 	});
+
+	it('ignores books logged as already-read, whose start date was never observed', () => {
+		const loggedAsRead: FinishedLike = {
+			...finishedBook('2026-07-10 09:00:00', '2026-07-10 09:00:00'),
+			start_unknown: 1
+		};
+		expect(hasSameDayFinish([loggedAsRead])).toBe(false);
+	});
 });
 
 describe('hasTwoFinishesWithinDays', () => {

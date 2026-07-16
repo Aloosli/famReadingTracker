@@ -38,6 +38,8 @@ export interface ReadingEntryRow {
 	finished_at: string | null;
 	reaction: 'loved' | 'liked' | 'meh' | null;
 	set_aside_at: string | null;
+	/** 1 when the entry was logged as already-read, so started_at is a placeholder. */
+	start_unknown: number;
 	created_at: string;
 }
 

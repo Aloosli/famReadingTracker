@@ -42,6 +42,10 @@ CREATE TABLE IF NOT EXISTS reading_entries (
 	reaction TEXT CHECK (reaction IN ('loved', 'liked', 'meh')),
 	-- When set, the book is "set aside" (paused): still status 'reading', but not actively read.
 	set_aside_at TEXT,
+	-- Set for books logged as already-read: the reader said it's finished but never said when they
+	-- started, so started_at above is a placeholder rather than something we observed. Anything
+	-- reasoning about how long a book took must ignore these.
+	start_unknown INTEGER NOT NULL DEFAULT 0,
 	created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

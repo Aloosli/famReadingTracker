@@ -93,10 +93,13 @@ export function addAlreadyRead(userId: number, bookId: number): ReadingEntryRow 
 		return db.prepare('SELECT * FROM reading_entries WHERE id = ?').get(existing.id) as ReadingEntryRow;
 	}
 
+	// started_at is required by the schema but never actually observed here, so flag it as unknown:
+	// otherwise the entry looks like a book started and finished today, and hands out the
+	// read-it-in-a-day title for something the reader may have finished years ago.
 	const result = db
 		.prepare(
-			`INSERT INTO reading_entries (user_id, book_id, status, started_at, finished_at)
-			 VALUES (?, ?, 'finished', datetime('now'), datetime('now'))`
+			`INSERT INTO reading_entries (user_id, book_id, status, started_at, finished_at, start_unknown)
+			 VALUES (?, ?, 'finished', datetime('now'), datetime('now'), 1)`
 		)
 		.run(userId, bookId);
 	return db

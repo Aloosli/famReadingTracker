@@ -48,6 +48,10 @@ if (!entryColumns.some((column) => column.name === 'reaction')) {
 if (!entryColumns.some((column) => column.name === 'set_aside_at')) {
 	db.exec('ALTER TABLE reading_entries ADD COLUMN set_aside_at TEXT');
 }
+// ...or record that an entry's start date was never observed (logged as already-read).
+if (!entryColumns.some((column) => column.name === 'start_unknown')) {
+	db.exec('ALTER TABLE reading_entries ADD COLUMN start_unknown INTEGER NOT NULL DEFAULT 0');
+}
 
 // Multi-tenancy foundation: every reader and book belongs to a household. Databases created before
 // households existed get the column added here, then adopted into a default household below.

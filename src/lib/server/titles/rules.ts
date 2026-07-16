@@ -15,6 +15,8 @@ export interface FinishedLike {
 	started_at: string;
 	finished_at: string | null;
 	page_count: number | null;
+	/** 1 when logged as already-read — started_at is a placeholder, not an observed start. */
+	start_unknown?: number;
 }
 
 export interface SeasonWindow {
@@ -94,10 +96,17 @@ export function hasWeekendPair(sessions: SessionLike[]): boolean {
 	return false;
 }
 
-/** True if any book was finished on the same calendar day it was started — read in one sitting. */
+/**
+ * True if any book was finished on the same calendar day it was started — read in one sitting.
+ * Books logged as already-read are ignored: their start date was never observed, so the placeholder
+ * makes them look like a one-day read when the reader may have finished them years ago.
+ */
 export function hasSameDayFinish(finished: FinishedLike[]): boolean {
 	return finished.some(
-		(entry) => entry.finished_at != null && entry.started_at.slice(0, 10) === entry.finished_at.slice(0, 10)
+		(entry) =>
+			!entry.start_unknown &&
+			entry.finished_at != null &&
+			entry.started_at.slice(0, 10) === entry.finished_at.slice(0, 10)
 	);
 }
 
