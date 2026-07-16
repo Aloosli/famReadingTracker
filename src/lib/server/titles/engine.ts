@@ -97,7 +97,7 @@ export function evaluateTitles(userId: number): TitleGrant[] {
 	}
 
 	// Read a whole book in a single day.
-	if (hasSameDayFinish(finished)) {
+	if (hasSameDayFinish(finished, THRESHOLDS.sameDayFinishMinMinutes)) {
 		const grant = tryGrant(userId, 'finisher');
 		if (grant) grants.push(grant);
 	}
@@ -169,7 +169,7 @@ export function revokeFinishDependentTitles(userId: number): void {
 	if (!hasLongBook) {
 		revokeTitle(userId, 'absolute_unit');
 	}
-	if (!hasSameDayFinish(finished)) {
+	if (!hasSameDayFinish(finished, THRESHOLDS.sameDayFinishMinMinutes)) {
 		revokeTitle(userId, 'finisher');
 	}
 	if (!hasTwoFinishesWithinDays(finished, THRESHOLDS.doubleFeatureWindowDays)) {

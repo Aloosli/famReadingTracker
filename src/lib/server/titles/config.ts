@@ -222,6 +222,13 @@ export const THRESHOLDS = {
 	onARollBooksPerMonth: 3,
 	/** double_feature: two books finished within this many days of each other (back-to-back). */
 	doubleFeatureWindowDays: 3,
+	/**
+	 * finisher: a same-day finish only counts if this many minutes passed between adding the book
+	 * and finishing it. started_at records when a book reached the shelf, not when reading began,
+	 * so marking one finished moments after adding it is someone recording a book they'd already
+	 * read. The trade: a genuinely quick read (a short picture book) won't earn it either.
+	 */
+	sameDayFinishMinMinutes: 5,
 	/** speed_demon: this many progress logs within the window below. */
 	speedDemonMinLogs: 5,
 	speedDemonWindowHours: 24,

@@ -143,16 +143,22 @@ describe('hasWeekendPair', () => {
 });
 
 describe('hasSameDayFinish', () => {
+	const MIN_MINUTES = 5;
+
 	it('is true when a book is finished the day it was started', () => {
-		expect(hasSameDayFinish([finishedBook('2026-07-10 09:00:00', '2026-07-10 21:00:00')])).toBe(true);
+		expect(
+			hasSameDayFinish([finishedBook('2026-07-10 09:00:00', '2026-07-10 21:00:00')], MIN_MINUTES)
+		).toBe(true);
 	});
 
 	it('is false when start and finish are different days', () => {
-		expect(hasSameDayFinish([finishedBook('2026-07-08 09:00:00', '2026-07-10 21:00:00')])).toBe(false);
+		expect(
+			hasSameDayFinish([finishedBook('2026-07-08 09:00:00', '2026-07-10 21:00:00')], MIN_MINUTES)
+		).toBe(false);
 	});
 
 	it('ignores books that are not finished', () => {
-		expect(hasSameDayFinish([finishedBook('2026-07-10 09:00:00', null)])).toBe(false);
+		expect(hasSameDayFinish([finishedBook('2026-07-10 09:00:00', null)], MIN_MINUTES)).toBe(false);
 	});
 
 	it('ignores books logged as already-read, whose start date was never observed', () => {
@@ -160,7 +166,19 @@ describe('hasSameDayFinish', () => {
 			...finishedBook('2026-07-10 09:00:00', '2026-07-10 09:00:00'),
 			start_unknown: 1
 		};
-		expect(hasSameDayFinish([loggedAsRead])).toBe(false);
+		expect(hasSameDayFinish([loggedAsRead], MIN_MINUTES)).toBe(false);
+	});
+
+	it('ignores a book marked finished seconds after it was added — that is logging, not reading', () => {
+		expect(
+			hasSameDayFinish([finishedBook('2026-07-16 08:47:13', '2026-07-16 08:47:21')], MIN_MINUTES)
+		).toBe(false);
+	});
+
+	it('counts a finish once the minimum time has passed', () => {
+		expect(
+			hasSameDayFinish([finishedBook('2026-07-10 09:00:00', '2026-07-10 09:05:00')], MIN_MINUTES)
+		).toBe(true);
 	});
 });
 

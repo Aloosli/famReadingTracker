@@ -98,16 +98,19 @@ export function hasWeekendPair(sessions: SessionLike[]): boolean {
 
 /**
  * True if any book was finished on the same calendar day it was started — read in one sitting.
- * Books logged as already-read are ignored: their start date was never observed, so the placeholder
- * makes them look like a one-day read when the reader may have finished them years ago.
+ *
+ * Two kinds of entry are deliberately not "read in a day", because started_at records when a book
+ * reached the shelf rather than when reading began:
+ *  - logged as already-read (start_unknown), where the start was never observed at all;
+ *  - finished less than `minMinutes` after being added, which is recording a book already read.
  */
-export function hasSameDayFinish(finished: FinishedLike[]): boolean {
-	return finished.some(
-		(entry) =>
-			!entry.start_unknown &&
-			entry.finished_at != null &&
-			entry.started_at.slice(0, 10) === entry.finished_at.slice(0, 10)
-	);
+export function hasSameDayFinish(finished: FinishedLike[], minMinutes: number): boolean {
+	return finished.some((entry) => {
+		if (entry.start_unknown || entry.finished_at == null) return false;
+		if (entry.started_at.slice(0, 10) !== entry.finished_at.slice(0, 10)) return false;
+		const elapsedMs = toUtcMillis(entry.finished_at) - toUtcMillis(entry.started_at);
+		return elapsedMs >= minMinutes * 60_000;
+	});
 }
 
 /**
