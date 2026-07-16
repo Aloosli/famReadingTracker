@@ -90,6 +90,15 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<link rel="manifest" href="/manifest.webmanifest" />
+	<!-- iOS ignores the manifest's icons and needs a PNG of its own. -->
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	<!-- iOS before 16.4 only goes full-screen on the apple-prefixed tag; the standard one covers
+	     everything since. Without these, Add to Home Screen just opens Safari with its chrome. -->
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-title" content="Reading" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 </svelte:head>
 
 <svelte:window
