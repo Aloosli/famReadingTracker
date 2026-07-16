@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
-import { join } from 'node:path';
+import { mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { env } from '$env/dynamic/private';
 import { TITLE_CATALOG } from '../titles/config';
 import { seedTitleCatalog } from './titles';
@@ -9,6 +10,10 @@ import { seedTitleCatalog } from './titles';
 import schema from './schema.sql?raw';
 
 export const dbPath = env.DATABASE_PATH || join(process.cwd(), 'data', 'reading-tracker.db');
+
+// better-sqlite3 will not create missing parent directories. This module is imported at build time
+// (SvelteKit's route analysis) and on a fresh host before any data directory exists, so make it.
+mkdirSync(dirname(dbPath), { recursive: true });
 
 export const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
