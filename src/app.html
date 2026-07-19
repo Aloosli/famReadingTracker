@@ -14,8 +14,15 @@
 					stored = localStorage.getItem('theme');
 				} catch (e) {}
 				var theme =
-					stored ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+					stored === 'light' || stored === 'dark' || stored === 'sonic'
+						? stored
+						: matchMedia('(prefers-color-scheme: dark)').matches
+							? 'dark'
+							: 'light';
 				document.documentElement.dataset.theme = theme;
+				var colors = { light: '#f5ead9', dark: '#1c1611', sonic: '#1573e6' };
+				var meta = document.getElementById('theme-color-meta');
+				if (meta) meta.setAttribute('content', colors[theme]);
 			})();
 		</script>
 		%sveltekit.head%

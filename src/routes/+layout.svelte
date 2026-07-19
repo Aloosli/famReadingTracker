@@ -1,7 +1,8 @@
 <script lang="ts">
 	import '$lib/styles/global.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+	import ThemeSwitch from '$lib/components/ThemeSwitch.svelte';
+	import SonicScenery from '$lib/components/SonicScenery.svelte';
 	import SoundToggle from '$lib/components/SoundToggle.svelte';
 	import { onNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -108,6 +109,7 @@
 	onpointerdown={onPointerDown}
 />
 
+<SonicScenery />
 <SoundToggle />
-<ThemeToggle />
+<ThemeSwitch />
 {@render children()}

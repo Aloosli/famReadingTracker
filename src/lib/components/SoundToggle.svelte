@@ -28,7 +28,8 @@
 	.sound-toggle {
 		position: fixed;
 		top: calc(1rem + env(safe-area-inset-top));
-		right: calc(1rem + 44px + 0.6rem + env(safe-area-inset-right));
+		/* Sits to the left of the theme switch pill (~132px wide). */
+		right: calc(1rem + 132px + 0.6rem + env(safe-area-inset-right));
 		z-index: 50;
 		width: 44px;
 		height: 44px;

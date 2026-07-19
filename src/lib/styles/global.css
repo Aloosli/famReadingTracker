@@ -61,6 +61,27 @@
 	color-scheme: dark;
 }
 
+/* Sonic mode — Green Hill Zone blues (see SonicScenery.svelte for the backdrop).
+   Placed after the dark rules so it wins the equal-specificity tie when the OS
+   is in dark mode. */
+:root[data-theme='sonic'] {
+	--color-bg: #1573e6;
+	--color-bg-alt: #3f9bff;
+	--color-surface: #ffffff;
+	--color-wood: #0a3d91;
+	--color-wood-dark: #06285f;
+	--color-text: #0a2a52;
+	--color-text-muted: #5a6b85;
+	--color-accent: #e52521;
+	--color-accent-hover: #c81e1a;
+	--color-shadow: rgba(6, 40, 95, 0.28);
+	--color-border: #bcd9ff;
+	--color-disabled: #c9d8ec;
+	--color-error: #c0271f;
+
+	color-scheme: light;
+}
+
 * {
 	box-sizing: border-box;
 }
