@@ -42,37 +42,53 @@ describe('computeReadingStreak', () => {
 });
 
 describe('planFreezeConsumption', () => {
-	// "today" is 2026-07-10; yesterday is 07-09.
+	// "today" is 2026-07-10; yesterday is 07-09. Freezes are given as the dates they were banked;
+	// '2026-07-01' is safely before any gap below.
+	const old = '2026-07-01';
+
 	it('does nothing when no freezes are banked', () => {
-		expect(planFreezeConsumption(new Set(['2026-07-08']), 0, now)).toEqual([]);
+		expect(planFreezeConsumption(new Set(['2026-07-08']), [], now)).toEqual([]);
 	});
 
 	it('does nothing when yesterday was already active', () => {
-		expect(planFreezeConsumption(new Set(['2026-07-09']), 2, now)).toEqual([]);
+		expect(planFreezeConsumption(new Set(['2026-07-09']), [old, old], now)).toEqual([]);
 	});
 
 	it('bridges a single missed yesterday when a prior day reconnects', () => {
 		// read 07-08, missed 07-09 → freeze 07-09 to reconnect.
-		expect(planFreezeConsumption(new Set(['2026-07-08']), 1, now)).toEqual(['2026-07-09']);
+		expect(planFreezeConsumption(new Set(['2026-07-08']), [old], now)).toEqual(['2026-07-09']);
 	});
 
 	it('bridges two missed days with two freezes', () => {
 		// read 07-07, missed 07-08 and 07-09.
-		expect(planFreezeConsumption(new Set(['2026-07-07']), 2, now)).toEqual(['2026-07-09', '2026-07-08']);
+		expect(planFreezeConsumption(new Set(['2026-07-07']), [old, old], now)).toEqual([
+			'2026-07-09',
+			'2026-07-08'
+		]);
 	});
 
 	it('spends nothing when the gap is longer than the freezes on hand', () => {
 		// missed 07-08 and 07-09 but only one freeze → can't reconnect, so don't waste it.
-		expect(planFreezeConsumption(new Set(['2026-07-07']), 1, now)).toEqual([]);
+		expect(planFreezeConsumption(new Set(['2026-07-07']), [old], now)).toEqual([]);
 	});
 
 	it('bridges an internal gap even when today is active', () => {
 		// active today + 07-08, missed 07-09 → freeze 07-09 so the streak stays continuous.
-		expect(planFreezeConsumption(new Set(['2026-07-10', '2026-07-08']), 1, now)).toEqual(['2026-07-09']);
+		expect(planFreezeConsumption(new Set(['2026-07-10', '2026-07-08']), [old], now)).toEqual([
+			'2026-07-09'
+		]);
 	});
 
 	it('spends nothing when there is no prior activity to protect', () => {
-		expect(planFreezeConsumption(new Set(), 2, now)).toEqual([]);
+		expect(planFreezeConsumption(new Set(), [old, old], now)).toEqual([]);
+	});
+
+	it('does not retroactively protect a day earlier than the freeze was banked', () => {
+		// read 07-08, missed 07-09, but the only freeze was banked *today* (07-10) — it can't reach
+		// back to save 07-09, so the streak is not revived. (The Neea bug.)
+		expect(planFreezeConsumption(new Set(['2026-07-08']), ['2026-07-10'], now)).toEqual([]);
+		// A freeze banked on 07-08 (before the miss) *would* cover it.
+		expect(planFreezeConsumption(new Set(['2026-07-08']), ['2026-07-08'], now)).toEqual(['2026-07-09']);
 	});
 });
 

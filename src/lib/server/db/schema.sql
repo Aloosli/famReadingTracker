@@ -70,9 +70,19 @@ CREATE TABLE IF NOT EXISTS reading_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_reading_sessions_user_book ON reading_sessions(user_id, book_id);
 
--- Days a reader's streak was kept alive by spending a banked "streak freeze" (earned by a big
--- reading sitting). These count as active days in the streak calc, so a covered miss doesn't break
--- it. The available freeze balance lives on users.streak_freezes.
+-- One row per banked (unspent) streak freeze, with WHEN it was earned. The earned time matters: a
+-- freeze can only protect a day that was missed *after* it was banked — no retroactive protection.
+-- (Replaces the bare users.streak_freezes count, which had no earn time.)
+CREATE TABLE IF NOT EXISTS freeze_bank (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	earned_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_freeze_bank_user ON freeze_bank(user_id);
+
+-- Days a reader's streak was kept alive by spending a banked freeze. These count as active days in
+-- the streak calc, so a covered miss doesn't break it.
 CREATE TABLE IF NOT EXISTS streak_freeze_days (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

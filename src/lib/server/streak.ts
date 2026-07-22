@@ -96,30 +96,46 @@ export function freezeThreshold(recentSittingPages: number[]): number {
 
 /**
  * Works out which missed days a reader's banked freezes should protect to keep the streak alive,
- * walking back from yesterday. A freeze covers one missed day; we spend them on the most recent
- * gap first, and only commit if the bridge actually reconnects to a real active day — so freezes
- * are never wasted into a void (a gap longer than the freezes on hand just lets the streak break).
- * Returns the "YYYY-MM-DD" days to mark as frozen (empty if none needed or none can help).
+ * walking back from yesterday. Each freeze covers one missed day, but only a day that was missed
+ * *after* the freeze was banked — a freeze earned today can't reach back and save yesterday (no
+ * retroactive protection). We only commit if every day in the gap can be covered and the bridge
+ * reconnects to a real active day, so freezes are never wasted into a void. `freezeEarnedDays` is
+ * the "YYYY-MM-DD" a each banked freeze was earned. Returns the days to mark frozen (empty if none).
  */
 export function planFreezeConsumption(
 	activeDays: Set<string>,
-	freezesAvailable: number,
+	freezeEarnedDays: string[],
 	now: Date = new Date()
 ): string[] {
-	if (freezesAvailable <= 0) return [];
+	if (freezeEarnedDays.length === 0) return [];
 	const todayMs = Date.parse(`${now.toISOString().slice(0, 10)}T00:00:00Z`);
 	const dayStr = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-	let budget = freezesAvailable;
-	const toFreeze: string[] = [];
+	// Collect the run of missed days back from yesterday, up to the number of freezes on hand.
+	const gap: string[] = [];
 	let cursor = todayMs - 86_400_000; // yesterday — today is never "missed", it's still in progress
-	while (budget > 0 && !activeDays.has(dayStr(cursor))) {
-		toFreeze.push(dayStr(cursor));
-		budget--;
+	while (gap.length < freezeEarnedDays.length && !activeDays.has(dayStr(cursor))) {
+		gap.push(dayStr(cursor));
 		cursor -= 86_400_000;
 	}
-	// Only spend the freezes if we reached a genuinely active day (streak reconnects). If we ran out
-	// of budget still on a missed day, the streak is broken anyway — don't burn freezes for nothing.
-	if (!activeDays.has(dayStr(cursor))) return [];
-	return toFreeze;
+	if (gap.length === 0) return []; // yesterday already active — nothing to bridge
+	if (!activeDays.has(dayStr(cursor))) return []; // couldn't reconnect within the freezes on hand
+
+	// Each missed day needs a distinct freeze that was already banked before it. Assign oldest freeze
+	// to oldest day; if any day can't be covered, the streak can't be revived here — bridge nothing.
+	const daysOldestFirst = [...gap].sort();
+	const freezesOldestFirst = [...freezeEarnedDays].sort();
+	const used = new Array(freezesOldestFirst.length).fill(false);
+	for (const day of daysOldestFirst) {
+		let assigned = false;
+		for (let i = 0; i < freezesOldestFirst.length; i++) {
+			if (!used[i] && freezesOldestFirst[i] < day) {
+				used[i] = true;
+				assigned = true;
+				break;
+			}
+		}
+		if (!assigned) return [];
+	}
+	return gap;
 }

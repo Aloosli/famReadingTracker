@@ -59,6 +59,24 @@ if (!userColumnsForFreezes.some((column) => column.name === 'streak_freezes')) {
 	db.exec('ALTER TABLE users ADD COLUMN streak_freezes INTEGER NOT NULL DEFAULT 0');
 }
 
+// Move any balances from the old bare-count column into the timestamped freeze_bank (one row each),
+// so the no-retroactive-protection rule has earn times to work with. Runs only while a positive
+// count remains, then zeroes it — the column is legacy after this.
+const legacyFreezeCounts = db
+	.prepare('SELECT id, streak_freezes FROM users WHERE streak_freezes > 0')
+	.all() as { id: number; streak_freezes: number }[];
+if (legacyFreezeCounts.length) {
+	const insertBanked = db.prepare(
+		"INSERT INTO freeze_bank (user_id, earned_at) VALUES (?, datetime('now'))"
+	);
+	db.transaction(() => {
+		for (const u of legacyFreezeCounts) {
+			for (let i = 0; i < u.streak_freezes; i++) insertBanked.run(u.id);
+		}
+		db.prepare('UPDATE users SET streak_freezes = 0').run();
+	})();
+}
+
 // Migrate databases created before a session recorded when the reading actually happened
 // (read_at), separate from when the row was saved (created_at). Backfill it from created_at so
 // existing history is unchanged: every past log is treated as read at the moment it was recorded.

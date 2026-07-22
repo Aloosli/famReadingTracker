@@ -41,37 +41,47 @@ export function getFrozenDays(userId: number): Set<string> {
 
 /** A reader's banked (unspent) streak-freeze balance. */
 export function getStreakFreezes(userId: number): number {
-	const row = db.prepare(`SELECT streak_freezes FROM users WHERE id = ?`).get(userId) as
-		| { streak_freezes: number }
-		| undefined;
-	return row?.streak_freezes ?? 0;
+	const row = db.prepare(`SELECT COUNT(*) AS n FROM freeze_bank WHERE user_id = ?`).get(userId) as {
+		n: number;
+	};
+	return row.n;
+}
+
+/** The "YYYY-MM-DD" each banked freeze was earned, oldest first — for the no-retroactive rule. */
+function getFreezeEarnedDays(userId: number): string[] {
+	return (
+		db
+			.prepare(`SELECT date(earned_at) AS d FROM freeze_bank WHERE user_id = ? ORDER BY earned_at`)
+			.all(userId) as { d: string }[]
+	).map((r) => r.d);
 }
 
 /**
  * Lazily spends banked freezes to protect recent missed days, keeping the streak alive. Called when
- * a reader loads their shelf: if they came back after missing a day (or two) and have freezes, this
- * bridges the gap. Idempotent — a bridged day is recorded, so it won't be paid for twice. Returns
- * how many freezes were just spent (0 if none were needed or none could help).
+ * a reader loads their shelf: if they came back after missing a day (or two) and have freezes that
+ * were banked before those days, this bridges the gap. Idempotent — a bridged day is recorded, so it
+ * won't be paid for twice. Returns how many freezes were just spent (0 if none were needed/eligible).
  */
 export function maintainStreakFreezes(userId: number, now: Date = new Date()): { consumed: number } {
-	const freezes = getStreakFreezes(userId);
-	if (freezes <= 0) return { consumed: 0 };
+	const earnedDays = getFreezeEarnedDays(userId);
+	if (earnedDays.length === 0) return { consumed: 0 };
 
 	const active = getActivityDays(userId);
 	for (const day of getFrozenDays(userId)) active.add(day);
 
-	const toFreeze = planFreezeConsumption(active, freezes, now);
+	const toFreeze = planFreezeConsumption(active, earnedDays, now);
 	if (toFreeze.length === 0) return { consumed: 0 };
 
-	const insert = db.prepare(
-		`INSERT OR IGNORE INTO streak_freeze_days (user_id, date) VALUES (?, ?)`
+	const insertDay = db.prepare(`INSERT OR IGNORE INTO streak_freeze_days (user_id, date) VALUES (?, ?)`);
+	// Spend the oldest banked freezes (the ones eligible for these days).
+	const spend = db.prepare(
+		`DELETE FROM freeze_bank WHERE id IN (
+			SELECT id FROM freeze_bank WHERE user_id = ? ORDER BY earned_at LIMIT ?
+		)`
 	);
 	db.transaction(() => {
-		for (const day of toFreeze) insert.run(userId, day);
-		db.prepare(`UPDATE users SET streak_freezes = streak_freezes - ? WHERE id = ?`).run(
-			toFreeze.length,
-			userId
-		);
+		for (const day of toFreeze) insertDay.run(userId, day);
+		spend.run(userId, toFreeze.length);
 	})();
 	return { consumed: toFreeze.length };
 }
@@ -107,7 +117,7 @@ export function awardFreezeForBigLog(userId: number): { earned: boolean; freezes
 		.slice(-FREEZE_WINDOW);
 
 	if (thisSitting >= freezeThreshold(baseline)) {
-		db.prepare(`UPDATE users SET streak_freezes = streak_freezes + 1 WHERE id = ?`).run(userId);
+		db.prepare(`INSERT INTO freeze_bank (user_id) VALUES (?)`).run(userId);
 		return { earned: true, freezes: current + 1 };
 	}
 	return { earned: false, freezes: current };
