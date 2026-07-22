@@ -37,8 +37,12 @@ export const MAX_STREAK_FREEZES = 2;
 // --- Adaptive freeze threshold ---------------------------------------------------------------
 // A freeze is earned by "beating your usual pace" rather than a flat page count, so it scales for a
 // slim-book kid and a doorstop-reading adult alike. Each is per-profile — no sibling comparison.
-/** Never earn on less than this many pages, even if a reader's baseline is tiny. */
-export const FREEZE_FLOOR_PAGES = 12;
+/**
+ * Never earn on less than this many pages, even if a reader's baseline is tiny — and the flat bar
+ * during cold start (before there's enough history to personalise). Kept high enough that a thin
+ * picture-book skim doesn't count as an impressive sitting.
+ */
+export const FREEZE_FLOOR_PAGES = 25;
 /** A sitting must beat the rolling median by this factor (higher = rarer freezes). */
 export const FREEZE_MULTIPLIER = 1.6;
 /** Rolling window of recent sittings the baseline is taken over. */
