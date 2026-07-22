@@ -92,6 +92,18 @@ export function revokeTitle(userId: number, key: string): void {
 	db.prepare('DELETE FROM user_titles WHERE user_id = ? AND title_key = ?').run(userId, key);
 }
 
+/**
+ * The most recent earned_at for a title (a UTC "YYYY-MM-DD HH:MM:SS" string), regardless of whether
+ * it has since expired, or null if never earned. The engine uses this to stop event-based temporary
+ * titles re-granting from an old, still-in-history event once the badge lapses.
+ */
+export function lastEarnedAt(userId: number, key: string): string | null {
+	const row = db
+		.prepare(`SELECT MAX(earned_at) AS t FROM user_titles WHERE user_id = ? AND title_key = ?`)
+		.get(userId, key) as { t: string | null } | undefined;
+	return row?.t ?? null;
+}
+
 export function grantTitle(userId: number, key: string, expiresAt: string | null): UserTitleRow {
 	const result = db
 		.prepare(

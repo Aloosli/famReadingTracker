@@ -34,18 +34,35 @@ export function toUtcMillis(datetimeStr: string): number {
  * True if at least `minCount` sessions fall within any `windowHours` span — a reading burst.
  * Assumes `sessions` is ordered oldest-first (as the DB returns them).
  */
+/**
+ * The end time (a session's read_at) of the *most recent* qualifying burst, or null if there isn't
+ * one. Returned as a UTC "YYYY-MM-DD HH:MM:SS" string so the engine can tell an old burst from a new
+ * one and not re-grant a temporary badge from ancient history. Assumes `sessions` is oldest-first.
+ */
+export function latestSessionBurstEnd(
+	sessions: SessionLike[],
+	minCount: number,
+	windowHours: number
+): string | null {
+	if (sessions.length < minCount) return null;
+	const windowMs = windowHours * 3_600_000;
+	const times = sessions.map((s) => toUtcMillis(s.read_at));
+	let latestEnd: number | null = null;
+	for (let i = 0; i <= times.length - minCount; i++) {
+		if (times[i + minCount - 1] - times[i] <= windowMs) {
+			const end = times[i + minCount - 1];
+			if (latestEnd === null || end > latestEnd) latestEnd = end;
+		}
+	}
+	return latestEnd === null ? null : new Date(latestEnd).toISOString().slice(0, 19).replace('T', ' ');
+}
+
 export function hasBurstOfSessions(
 	sessions: SessionLike[],
 	minCount: number,
 	windowHours: number
 ): boolean {
-	if (sessions.length < minCount) return false;
-	const windowMs = windowHours * 3_600_000;
-	const times = sessions.map((s) => toUtcMillis(s.read_at));
-	for (let i = 0; i <= times.length - minCount; i++) {
-		if (times[i + minCount - 1] - times[i] <= windowMs) return true;
-	}
-	return false;
+	return latestSessionBurstEnd(sessions, minCount, windowHours) !== null;
 }
 
 /** Consecutive days (ending today, UTC) on which the reader logged at least one session. */
@@ -80,8 +97,12 @@ export function hasComebackGap(sessions: SessionLike[], minGapDays: number): boo
 	return false;
 }
 
-/** True if the reader logged on a Saturday and the very next day (its Sunday), UTC. */
-export function hasWeekendPair(sessions: SessionLike[]): boolean {
+/**
+ * The Sunday date ("YYYY-MM-DD", UTC) of the *most recent* Saturday+its-Sunday pair the reader
+ * logged on, or null if none. The engine uses the date to avoid re-granting Weekend Warrior from an
+ * old weekend once the badge has expired.
+ */
+export function latestWeekendPairSunday(sessions: SessionLike[]): string | null {
 	const saturdays = new Set<string>();
 	const sundays = new Set<string>();
 	for (const session of sessions) {
@@ -90,11 +111,17 @@ export function hasWeekendPair(sessions: SessionLike[]): boolean {
 		if (weekday === 6) saturdays.add(dateStr);
 		if (weekday === 0) sundays.add(dateStr);
 	}
+	let latest: string | null = null;
 	for (const sat of saturdays) {
-		const nextDay = new Date(Date.parse(`${sat}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
-		if (sundays.has(nextDay)) return true;
+		const sun = new Date(Date.parse(`${sat}T00:00:00Z`) + 86_400_000).toISOString().slice(0, 10);
+		if (sundays.has(sun) && (latest === null || sun > latest)) latest = sun;
 	}
-	return false;
+	return latest;
+}
+
+/** True if the reader logged on a Saturday and the very next day (its Sunday), UTC. */
+export function hasWeekendPair(sessions: SessionLike[]): boolean {
+	return latestWeekendPairSunday(sessions) !== null;
 }
 
 /**

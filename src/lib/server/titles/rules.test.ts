@@ -8,6 +8,8 @@ import {
 	hasSameDayFinish,
 	hasSessionInHourWindow,
 	hasWeekendPair,
+	latestSessionBurstEnd,
+	latestWeekendPairSunday,
 	totalFinishedPages,
 	toUtcMillis,
 	type FinishedLike,
@@ -65,6 +67,43 @@ describe('hasBurstOfSessions', () => {
 			session(1, '2026-07-10 11:00:00')
 		];
 		expect(hasBurstOfSessions(sessions, 3, 6)).toBe(true);
+	});
+});
+
+describe('latestSessionBurstEnd', () => {
+	it('is null when no burst qualifies', () => {
+		const sessions = [session(1, '2026-07-10 09:00:00'), session(1, '2026-07-13 20:00:00')];
+		expect(latestSessionBurstEnd(sessions, 3, 24)).toBeNull();
+	});
+
+	it('returns the end time of the most recent qualifying burst', () => {
+		const sessions = [
+			// an early burst ending 07-10 11:00
+			session(1, '2026-07-10 09:00:00'),
+			session(1, '2026-07-10 10:00:00'),
+			session(1, '2026-07-10 11:00:00'),
+			// a later burst ending 07-20 13:00
+			session(1, '2026-07-20 11:00:00'),
+			session(1, '2026-07-20 12:00:00'),
+			session(1, '2026-07-20 13:00:00')
+		];
+		expect(latestSessionBurstEnd(sessions, 3, 6)).toBe('2026-07-20 13:00:00');
+	});
+});
+
+describe('latestWeekendPairSunday', () => {
+	it('is null without a Saturday+Sunday pair', () => {
+		expect(latestWeekendPairSunday([session(1, '2026-07-15 10:00:00')])).toBeNull(); // a Wednesday
+	});
+
+	it('returns the Sunday of the most recent weekend pair', () => {
+		const sessions = [
+			session(1, '2026-07-11 10:00:00'), // Sat
+			session(1, '2026-07-12 10:00:00'), // Sun (pair)
+			session(1, '2026-07-18 10:00:00'), // Sat
+			session(1, '2026-07-19 10:00:00') // Sun (later pair)
+		];
+		expect(latestWeekendPairSunday(sessions)).toBe('2026-07-19');
 	});
 });
 

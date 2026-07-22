@@ -1,17 +1,17 @@
 import { getFinishedEntries } from '../db/entries';
 import { getSessionsForUser } from '../db/sessions';
-import { getTitle, grantTitle, holdsTitle, revokeTitle } from '../db/titles';
+import { getTitle, grantTitle, holdsTitle, lastEarnedAt, revokeTitle } from '../db/titles';
 import type { TitleGrant } from '$lib/types';
 import { THRESHOLDS, SEASONAL_WINDOWS } from './config';
 import {
 	consecutiveSessionDayStreak,
 	dateInSeasonWindow,
-	hasBurstOfSessions,
 	hasComebackGap,
 	hasTwoFinishesWithinDays,
 	hasSameDayFinish,
 	hasSessionInHourWindow,
-	hasWeekendPair,
+	latestSessionBurstEnd,
+	latestWeekendPairSunday,
 	totalFinishedPages
 } from './rules';
 
@@ -23,6 +23,29 @@ function endOfMonthDatetime(): string {
 	const now = new Date();
 	const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1) - 1000);
 	return end.toISOString().slice(0, 19).replace('T', ' ');
+}
+
+/**
+ * Grants a temporary, event-based title only when the triggering event is NEWER than the last time
+ * it was earned. The pattern behind these (a weekend read, a burst of logs) stays true in history
+ * forever, so without this check the badge would silently re-grant every time it expired and the
+ * reader logged again — e.g. earning Weekend Warrior on a random Wednesday. A genuinely new event
+ * (next weekend, a fresh burst) is later than the last grant and still re-earns it.
+ *
+ * `eventStamp` is compared at its own granularity: a date ("YYYY-MM-DD") against the last-earned
+ * date, a full datetime against the full last-earned time — hence slicing the stored time to match.
+ */
+function grantForNewerEvent(
+	userId: number,
+	key: string,
+	eventStamp: string | null,
+	grants: TitleGrant[]
+): void {
+	if (!eventStamp) return;
+	const last = lastEarnedAt(userId, key);
+	if (last && eventStamp <= last.slice(0, eventStamp.length)) return;
+	const grant = tryGrant(userId, key);
+	if (grant) grants.push(grant);
 }
 
 function tryGrant(userId: number, key: string, expiresAtOverride?: string | null): TitleGrant | null {
@@ -76,10 +99,14 @@ export function evaluateTitles(userId: number): TitleGrant[] {
 		if (grant) grants.push(grant);
 	}
 
-	if (hasBurstOfSessions(sessions, THRESHOLDS.speedDemonMinLogs, THRESHOLDS.speedDemonWindowHours)) {
-		const grant = tryGrant(userId, 'speed_demon');
-		if (grant) grants.push(grant);
-	}
+	// Speed Demon: a burst of logs in a short window. Event-based temporary title — only (re)grant
+	// when the burst is newer than the last grant, so an old burst doesn't re-earn it after it lapses.
+	grantForNewerEvent(
+		userId,
+		'speed_demon',
+		latestSessionBurstEnd(sessions, THRESHOLDS.speedDemonMinLogs, THRESHOLDS.speedDemonWindowHours),
+		grants
+	);
 
 	if (consecutiveSessionDayStreak(sessions) >= THRESHOLDS.unstoppableDays) {
 		const grant = tryGrant(userId, 'unstoppable');
@@ -91,10 +118,9 @@ export function evaluateTitles(userId: number): TitleGrant[] {
 		if (grant) grants.push(grant);
 	}
 
-	if (hasWeekendPair(sessions)) {
-		const grant = tryGrant(userId, 'weekend_warrior');
-		if (grant) grants.push(grant);
-	}
+	// Weekend Warrior: read a Saturday and its Sunday. Event-based temporary title — gated on the
+	// weekend being newer than the last grant, so a past weekend can't re-earn it mid-week.
+	grantForNewerEvent(userId, 'weekend_warrior', latestWeekendPairSunday(sessions), grants);
 
 	// Read a whole book in a single day.
 	if (hasSameDayFinish(finished, THRESHOLDS.sameDayFinishMinMinutes)) {
