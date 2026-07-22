@@ -24,6 +24,7 @@ import { evaluateTitles, revokeFinishDependentTitles } from '$lib/server/titles/
 import { READING_TIME_OF_DAY, type ReadingTimeOfDay } from '$lib/server/titles/config';
 import { getPatchesForUser, setActiveTitle as applyActiveTitle } from '$lib/server/db/titles';
 import { getActiveGoal, getGoalProgress, pagesReadSince } from '$lib/server/db/goals';
+import { awardFreezeForBigLog, getStreakFreezes, maintainStreakFreezes } from '$lib/server/db/streaks';
 import { getWishlist, removeFromWishlist as removeWishlistItem } from '$lib/server/db/wishlist';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -77,10 +78,16 @@ export const load: PageServerLoad = ({ cookies }) => {
 		};
 	}
 
+	// Spend any banked freezes needed to cover a recently missed day, then read the (protected)
+	// streak. `freezeUsed` is >0 only on the load that actually consumes one, so the page can note it.
+	const { consumed: freezeUsed } = maintainStreakFreezes(user.id);
+
 	return {
 		user,
 		currentlyReading: getCurrentlyReading(user.id),
 		streak: getReadingStreak(user.id),
+		streakFreezes: getStreakFreezes(user.id),
+		freezeUsed,
 		finishedThisMonth: countFinishedThisMonth(user.id),
 		bookshelf: getFinishedShelf(user.id),
 		wishlist: getWishlist(user.id),
@@ -203,8 +210,10 @@ export const actions: Actions = {
 		}
 
 		saveProgress(user.id, bookId, Math.round(position), positionType, readAt);
+		// A big enough jump in one sitting banks a streak freeze (unless already at the cap).
+		const freeze = awardFreezeForBigLog(user.id, bookId);
 		const grants = evaluateTitles(user.id);
-		return { success: true, grants };
+		return { success: true, grants, freezeEarned: freeze.earned };
 	},
 	checkIn: async ({ request, cookies }) => {
 		const profileId = cookies.get(PROFILE_COOKIE);

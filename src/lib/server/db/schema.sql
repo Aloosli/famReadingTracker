@@ -70,6 +70,19 @@ CREATE TABLE IF NOT EXISTS reading_sessions (
 
 CREATE INDEX IF NOT EXISTS idx_reading_sessions_user_book ON reading_sessions(user_id, book_id);
 
+-- Days a reader's streak was kept alive by spending a banked "streak freeze" (earned by a big
+-- reading sitting). These count as active days in the streak calc, so a covered miss doesn't break
+-- it. The available freeze balance lives on users.streak_freezes.
+CREATE TABLE IF NOT EXISTS streak_freeze_days (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	date TEXT NOT NULL,
+	created_at TEXT NOT NULL DEFAULT (datetime('now')),
+	UNIQUE (user_id, date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_streak_freeze_days_user ON streak_freeze_days(user_id);
+
 -- "Up Next": books a reader wants to read but hasn't started.
 CREATE TABLE IF NOT EXISTS wishlist (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,

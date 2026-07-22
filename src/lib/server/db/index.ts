@@ -53,6 +53,12 @@ if (!entryColumns.some((column) => column.name === 'start_unknown')) {
 	db.exec('ALTER TABLE reading_entries ADD COLUMN start_unknown INTEGER NOT NULL DEFAULT 0');
 }
 
+// Migrate databases created before readers could bank "streak freezes".
+const userColumnsForFreezes = db.prepare('PRAGMA table_info(users)').all() as { name: string }[];
+if (!userColumnsForFreezes.some((column) => column.name === 'streak_freezes')) {
+	db.exec('ALTER TABLE users ADD COLUMN streak_freezes INTEGER NOT NULL DEFAULT 0');
+}
+
 // Migrate databases created before a session recorded when the reading actually happened
 // (read_at), separate from when the row was saved (created_at). Backfill it from created_at so
 // existing history is unchanged: every past log is treated as read at the moment it was recorded.
@@ -98,3 +104,13 @@ db.prepare('UPDATE books SET household_id = ? WHERE household_id IS NULL').run(d
 
 // Keep the titles table in sync with the code-defined catalog on every start.
 seedTitleCatalog(TITLE_CATALOG);
+
+// Invariant: a permanent title never keeps an expiry. Badges that used to be temporary are now
+// permanent collectibles, so any still-ticking expiry on an already-granted one is cleared here —
+// nobody loses a badge they earned. Idempotent (after the first clear nothing matches), and it
+// self-heals if a title is ever flipped from temporary to permanent in the catalog again.
+db.prepare(
+	`UPDATE user_titles SET expires_at = NULL
+	 WHERE expires_at IS NOT NULL
+	   AND title_key IN (SELECT key FROM titles WHERE is_temporary = 0)`
+).run();

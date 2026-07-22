@@ -1,5 +1,6 @@
 import { db } from './index';
 import { computeReadingStreak } from '../streak';
+import { getActivityDays, getFrozenDays } from './streaks';
 import { computePersonalBests, type PersonalBest } from '../personal-bests';
 import type { PositionType, ReadingEntryRow } from './types';
 
@@ -339,19 +340,8 @@ export function getFamilyRecentlyFinished(
  * are UTC to match datetime('now') used elsewhere in the schema.
  */
 export function getReadingStreak(userId: number): number {
-	const sessionDays = db
-		.prepare(`SELECT DISTINCT date(read_at) AS day FROM reading_sessions WHERE user_id = ?`)
-		.all(userId) as { day: string }[];
-	const finishDays = db
-		.prepare(
-			`SELECT DISTINCT date(finished_at) AS day FROM reading_entries
-			 WHERE user_id = ? AND status = 'finished' AND finished_at IS NOT NULL`
-		)
-		.all(userId) as { day: string }[];
-
-	const activeDays = new Set<string>();
-	for (const row of sessionDays) activeDays.add(row.day);
-	for (const row of finishDays) activeDays.add(row.day);
-
+	// Active days = real reading (sessions/finishes) plus any days a banked freeze kept alive.
+	const activeDays = getActivityDays(userId);
+	for (const day of getFrozenDays(userId)) activeDays.add(day);
 	return computeReadingStreak(activeDays);
 }

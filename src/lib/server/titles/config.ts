@@ -44,8 +44,8 @@ export const TITLE_CATALOG: TitleCatalogEntry[] = [
 		emoji: '🏎️',
 		color: '#d64545',
 		description: 'You tore through those pages like they owed you money.',
-		isTemporary: true,
-		durationDays: 7
+		isTemporary: false,
+		durationDays: null
 	},
 	{
 		key: 'unstoppable',
@@ -53,8 +53,8 @@ export const TITLE_CATALOG: TitleCatalogEntry[] = [
 		emoji: '🔥',
 		color: '#e0762f',
 		description: "Day after day, you keep showing up. The books don't stand a chance.",
-		isTemporary: true,
-		durationDays: 7
+		isTemporary: false,
+		durationDays: null
 	},
 	{
 		key: 'big_book',
@@ -89,8 +89,8 @@ export const TITLE_CATALOG: TitleCatalogEntry[] = [
 		emoji: '🛡️',
 		color: '#3f7fbf',
 		description: 'Saturday and Sunday, book in hand. You defended the whole weekend.',
-		isTemporary: true,
-		durationDays: 3
+		isTemporary: false,
+		durationDays: null
 	},
 	{
 		key: 'on_a_roll',
@@ -98,8 +98,8 @@ export const TITLE_CATALOG: TitleCatalogEntry[] = [
 		emoji: '🎲',
 		color: '#c2478a',
 		description: 'Book after book this month. Somebody stop you — actually, don\'t.',
-		isTemporary: true,
-		durationDays: 30
+		isTemporary: false,
+		durationDays: null
 	},
 	{
 		key: 'finisher',

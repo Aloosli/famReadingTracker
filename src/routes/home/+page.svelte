@@ -84,6 +84,8 @@
 	let logDate = $state('');
 	let logBucket = $state<LogBucket>('evening');
 	const yesterdayStr = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+	// Number of freeze slots shown — keep in sync with MAX_STREAK_FREEZES on the server.
+	const MAX_FREEZES = 2;
 	// What the form actually submits, derived from the picker above.
 	const readWhenValue = $derived(
 		logWhen === 'now' ? 'now' : logWhen === 'lastnight' ? yesterdayStr : logDate || yesterdayStr
@@ -135,7 +137,15 @@
 	}
 
 	function queueTitleGrants(actionData: unknown) {
-		queueGrants((actionData as { grants?: TitleGrant[] } | undefined)?.grants ?? []);
+		const data = actionData as { grants?: TitleGrant[]; freezeEarned?: boolean } | undefined;
+		queueGrants(data?.grants ?? []);
+		if (data?.freezeEarned) {
+			queueCelebration({
+				message: 'Streak Freeze earned! It saves your streak if you miss a day.',
+				emoji: '🧊',
+				patch: null
+			});
+		}
 	}
 
 	// Give each celebration its voice as it appears: a sparkle for a patch, a warm chime otherwise.
@@ -234,11 +244,27 @@
 		</section>
 	{/if}
 
-	<section class="stats">
-		<div class="stat-card">
-			<span class="stat-value">🔥 {Math.round(streakCount.current)}</span>
-			<span class="stat-label">day streak</span>
+	<section class="streak-hero">
+		<div class="streak-flame" class:cold={data.streak === 0} aria-hidden="true">🔥</div>
+		<div class="streak-main">
+			<span class="streak-number">{Math.round(streakCount.current)}</span>
+			<span class="streak-word">day streak</span>
 		</div>
+		<div
+			class="streak-freezes"
+			title="Read a big chunk in one sitting to bank a freeze. It saves your streak if you miss a day."
+		>
+			{#each Array.from({ length: MAX_FREEZES }) as _, i (i)}
+				<span class="freeze-slot" class:filled={i < (data.streakFreezes ?? 0)}>🧊</span>
+			{/each}
+			<span class="freeze-label">{(data.streakFreezes ?? 0) ? 'freezes ready' : 'no freezes yet'}</span>
+		</div>
+	</section>
+	{#if data.freezeUsed > 0}
+		<p class="freeze-note" role="status">🧊 A streak freeze kept your streak alive — nice sitting!</p>
+	{/if}
+
+	<section class="stats">
 		<div class="stat-card goal-card">
 			<div class="goal-header">
 				{#if editingGoal}
@@ -1083,6 +1109,90 @@
 		font-weight: 600;
 		font-size: 0.95rem;
 		text-decoration: none;
+	}
+
+	/* The streak is the hero of the shelf now — a big warm card with the flame, the count, and the
+	   banked freezes that protect it. */
+	.streak-hero {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		background: linear-gradient(135deg, #ff8a3d, #e0762f);
+		color: #fff;
+		border-radius: var(--radius-md);
+		padding: 1.1rem 1.4rem;
+		box-shadow: 0 6px 18px var(--color-shadow);
+	}
+
+	.streak-flame {
+		font-size: 2.6rem;
+		line-height: 1;
+		filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
+	}
+
+	.streak-flame.cold {
+		filter: grayscale(1);
+		opacity: 0.7;
+	}
+
+	.streak-main {
+		display: flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		flex: 1;
+		min-width: 0;
+	}
+
+	.streak-number {
+		font-family: var(--font-heading);
+		font-size: 2.8rem;
+		font-weight: 800;
+		line-height: 1;
+	}
+
+	.streak-word {
+		font-size: 1rem;
+		font-weight: 600;
+		opacity: 0.95;
+	}
+
+	.streak-freezes {
+		display: flex;
+		align-items: center;
+		gap: 0.2rem;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		max-width: 6.5rem;
+	}
+
+	.freeze-slot {
+		font-size: 1.2rem;
+		line-height: 1;
+		opacity: 0.28;
+		filter: grayscale(1);
+	}
+
+	.freeze-slot.filled {
+		opacity: 1;
+		filter: none;
+	}
+
+	.freeze-label {
+		flex-basis: 100%;
+		text-align: right;
+		font-size: 0.7rem;
+		font-weight: 600;
+		opacity: 0.9;
+	}
+
+	.freeze-note {
+		margin: 0;
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: var(--color-text);
+		background: var(--color-bg-alt);
+		border-radius: var(--radius-sm);
+		padding: 0.6rem 0.9rem;
 	}
 
 	.stats {
