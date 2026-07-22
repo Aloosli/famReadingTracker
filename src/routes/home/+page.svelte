@@ -1115,7 +1115,9 @@
 
 	/* The streak sits quietly alongside the other cards — same surface, just a muted warm border and
 	   a bigger flame as the anchor. */
-	.streak-card {
+	/* Scoped to .stat-card.streak-card so the row layout / gap win over the base .stat-card rule
+	   (equal-specificity, defined later) that would otherwise stack it into a column. */
+	.stat-card.streak-card {
 		flex: 1 1 240px;
 		flex-direction: row;
 		align-items: center;
