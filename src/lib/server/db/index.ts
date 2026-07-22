@@ -53,6 +53,17 @@ if (!entryColumns.some((column) => column.name === 'start_unknown')) {
 	db.exec('ALTER TABLE reading_entries ADD COLUMN start_unknown INTEGER NOT NULL DEFAULT 0');
 }
 
+// Migrate databases created before a session recorded when the reading actually happened
+// (read_at), separate from when the row was saved (created_at). Backfill it from created_at so
+// existing history is unchanged: every past log is treated as read at the moment it was recorded.
+const sessionColumns = db.prepare('PRAGMA table_info(reading_sessions)').all() as { name: string }[];
+if (!sessionColumns.some((column) => column.name === 'read_at')) {
+	// ALTER can't add a NOT NULL column with a non-constant default, so add it nullable, backfill,
+	// then rely on the app always supplying read_at on insert (schema.sql defaults it for fresh DBs).
+	db.exec('ALTER TABLE reading_sessions ADD COLUMN read_at TEXT');
+	db.exec('UPDATE reading_sessions SET read_at = created_at WHERE read_at IS NULL');
+}
+
 // Multi-tenancy foundation: every reader and book belongs to a household. Databases created before
 // households existed get the column added here, then adopted into a default household below.
 const userColumns = db.prepare('PRAGMA table_info(users)').all() as { name: string }[];

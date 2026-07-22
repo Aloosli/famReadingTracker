@@ -75,6 +75,20 @@
 	let logPosition = $state('');
 	let logType: 'page' | 'percent' = $state('page');
 	let pageCountDraft = $state('');
+
+	// "When did you read this?" — for logging progress after the fact. 'now' is a live log; the
+	// others backdate the reading to a chosen day + rough time of day (see resolveReadAt on the server).
+	type LogWhen = 'now' | 'lastnight' | 'earlier';
+	type LogBucket = 'morning' | 'afternoon' | 'evening' | 'night';
+	let logWhen = $state<LogWhen>('now');
+	let logDate = $state('');
+	let logBucket = $state<LogBucket>('evening');
+	const yesterdayStr = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+	// What the form actually submits, derived from the picker above.
+	const readWhenValue = $derived(
+		logWhen === 'now' ? 'now' : logWhen === 'lastnight' ? yesterdayStr : logDate || yesterdayStr
+	);
+	const readTimeValue: LogBucket = $derived(logWhen === 'lastnight' ? 'night' : logBucket);
 	let editingGoal = $state(false);
 	let goalDraft = $state('');
 	let selectedFinishedId: number | null = $state(null);
@@ -154,6 +168,9 @@
 		logPosition = '';
 		logType = entry.latest_position_type ?? 'page';
 		pageCountDraft = entry.page_count ? String(entry.page_count) : '';
+		logWhen = 'now';
+		logDate = yesterdayStr;
+		logBucket = 'evening';
 	}
 
 	function forgetLocally() {
@@ -396,6 +413,62 @@
 								>
 									<input type="hidden" name="bookId" value={entry.book_id} />
 									<input type="hidden" name="positionType" value={logType} />
+									<input type="hidden" name="readWhen" value={readWhenValue} />
+									<input type="hidden" name="readTime" value={readTimeValue} />
+
+									<div class="log-when">
+										<span class="log-when-label">When?</span>
+										<div class="log-when-chips">
+											<button
+												type="button"
+												class:active={logWhen === 'now'}
+												onclick={() => (logWhen = 'now')}>Just now</button
+											>
+											<button
+												type="button"
+												class:active={logWhen === 'lastnight'}
+												onclick={() => (logWhen = 'lastnight')}>Last night</button
+											>
+											<button
+												type="button"
+												class:active={logWhen === 'earlier'}
+												onclick={() => (logWhen = 'earlier')}>Earlier…</button
+											>
+										</div>
+									</div>
+									{#if logWhen === 'earlier'}
+										<div class="log-when-earlier">
+											<input
+												type="date"
+												aria-label="Reading date"
+												max={todayStr}
+												bind:value={logDate}
+											/>
+											<div class="log-bucket-toggle">
+												<button
+													type="button"
+													class:active={logBucket === 'morning'}
+													onclick={() => (logBucket = 'morning')}>Morning</button
+												>
+												<button
+													type="button"
+													class:active={logBucket === 'afternoon'}
+													onclick={() => (logBucket = 'afternoon')}>Afternoon</button
+												>
+												<button
+													type="button"
+													class:active={logBucket === 'evening'}
+													onclick={() => (logBucket = 'evening')}>Evening</button
+												>
+												<button
+													type="button"
+													class:active={logBucket === 'night'}
+													onclick={() => (logBucket = 'night')}>Night</button
+												>
+											</div>
+										</div>
+									{/if}
+
 									<div class="position-type-toggle">
 										<button
 											type="button"
@@ -1583,6 +1656,60 @@
 		background: var(--color-surface);
 		color: var(--color-text);
 		box-shadow: 0 2px 6px var(--color-shadow);
+	}
+
+	/* "When did you read this?" — each takes its own full-width row above the position input. */
+	.log-when,
+	.log-when-earlier {
+		flex-basis: 100%;
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.log-when-label {
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+	}
+
+	.log-when-chips,
+	.log-bucket-toggle {
+		display: flex;
+		flex-wrap: wrap;
+		background: var(--color-bg-alt);
+		border-radius: var(--radius-sm);
+		padding: 0.2rem;
+		gap: 0.1rem;
+	}
+
+	.log-when-chips button,
+	.log-bucket-toggle button {
+		border: none;
+		background: transparent;
+		padding: 0.4rem 0.65rem;
+		border-radius: var(--radius-sm);
+		font-weight: 600;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		cursor: pointer;
+	}
+
+	.log-when-chips button.active,
+	.log-bucket-toggle button.active {
+		background: var(--color-surface);
+		color: var(--color-text);
+		box-shadow: 0 2px 6px var(--color-shadow);
+	}
+
+	.log-when-earlier input[type='date'] {
+		font-size: 0.9rem;
+		padding: 0.45rem 0.6rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
 	}
 
 	.log-progress-save,

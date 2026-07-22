@@ -13,10 +13,11 @@ import {
 	type FinishedLike,
 	type SessionLike
 } from './rules';
+import { READING_TIME_OF_DAY, THRESHOLDS } from './config';
 
-/** Helper: a session on a given UTC day/time for a book. */
-function session(book_id: number, created_at: string): SessionLike {
-	return { book_id, created_at };
+/** Helper: a session read on a given UTC day/time for a book. */
+function session(book_id: number, read_at: string): SessionLike {
+	return { book_id, read_at };
 }
 
 function finishedBook(
@@ -245,6 +246,35 @@ describe('hasSessionInHourWindow', () => {
 
 	it('excludes daytime from a wrapping night window', () => {
 		expect(hasSessionInHourWindow([session(1, '2026-07-10 14:00:00')], 22, 5)).toBe(false);
+	});
+});
+
+// Guards the promise in config.ts: the rough time-of-day buckets an after-the-fact log can pick
+// line up with the Early Bird / Night Owl hour windows. Morning and Night qualify; the two
+// mid-day buckets sit clear of both. If a bucket hour or a threshold moves out of step, this fails.
+describe('backdate time buckets align with the time-of-day windows', () => {
+	const day = '2026-07-10';
+	const at = (hour: number) => session(1, `${day} ${String(hour).padStart(2, '0')}:00:00`);
+	const inEarlyBird = (hour: number) =>
+		hasSessionInHourWindow([at(hour)], THRESHOLDS.earlyBirdStartHour, THRESHOLDS.earlyBirdEndHour);
+	const inNightOwl = (hour: number) =>
+		hasSessionInHourWindow([at(hour)], THRESHOLDS.nightOwlStartHour, THRESHOLDS.nightOwlEndHour);
+
+	it('morning earns Early Bird only', () => {
+		expect(inEarlyBird(READING_TIME_OF_DAY.morning)).toBe(true);
+		expect(inNightOwl(READING_TIME_OF_DAY.morning)).toBe(false);
+	});
+
+	it('night earns Night Owl only', () => {
+		expect(inNightOwl(READING_TIME_OF_DAY.night)).toBe(true);
+		expect(inEarlyBird(READING_TIME_OF_DAY.night)).toBe(false);
+	});
+
+	it('afternoon and evening earn neither', () => {
+		for (const hour of [READING_TIME_OF_DAY.afternoon, READING_TIME_OF_DAY.evening]) {
+			expect(inEarlyBird(hour)).toBe(false);
+			expect(inNightOwl(hour)).toBe(false);
+		}
 	});
 });
 

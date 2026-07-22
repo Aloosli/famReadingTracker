@@ -8,7 +8,8 @@
 
 export interface SessionLike {
 	book_id: number;
-	created_at: string;
+	/** When the reading actually happened — after-the-fact logs carry their chosen date/time here. */
+	read_at: string;
 }
 
 export interface FinishedLike {
@@ -40,7 +41,7 @@ export function hasBurstOfSessions(
 ): boolean {
 	if (sessions.length < minCount) return false;
 	const windowMs = windowHours * 3_600_000;
-	const times = sessions.map((s) => toUtcMillis(s.created_at));
+	const times = sessions.map((s) => toUtcMillis(s.read_at));
 	for (let i = 0; i <= times.length - minCount; i++) {
 		if (times[i + minCount - 1] - times[i] <= windowMs) return true;
 	}
@@ -50,7 +51,7 @@ export function hasBurstOfSessions(
 /** Consecutive days (ending today, UTC) on which the reader logged at least one session. */
 export function consecutiveSessionDayStreak(sessions: SessionLike[], now: Date = new Date()): number {
 	if (sessions.length === 0) return 0;
-	const days = new Set(sessions.map((s) => s.created_at.slice(0, 10)));
+	const days = new Set(sessions.map((s) => s.read_at.slice(0, 10)));
 	const todayStr = now.toISOString().slice(0, 10);
 	let streak = 0;
 	let cursor = Date.parse(`${todayStr}T00:00:00Z`);
@@ -66,7 +67,7 @@ export function hasComebackGap(sessions: SessionLike[], minGapDays: number): boo
 	const byBook = new Map<number, number[]>();
 	for (const session of sessions) {
 		const times = byBook.get(session.book_id) ?? [];
-		times.push(toUtcMillis(session.created_at));
+		times.push(toUtcMillis(session.read_at));
 		byBook.set(session.book_id, times);
 	}
 	const minGapMs = minGapDays * 86_400_000;
@@ -84,7 +85,7 @@ export function hasWeekendPair(sessions: SessionLike[]): boolean {
 	const saturdays = new Set<string>();
 	const sundays = new Set<string>();
 	for (const session of sessions) {
-		const dateStr = session.created_at.slice(0, 10);
+		const dateStr = session.read_at.slice(0, 10);
 		const weekday = new Date(`${dateStr}T00:00:00Z`).getUTCDay();
 		if (weekday === 6) saturdays.add(dateStr);
 		if (weekday === 0) sundays.add(dateStr);
@@ -144,7 +145,7 @@ export function hasSessionInHourWindow(
 	endHour: number
 ): boolean {
 	return sessions.some((session) => {
-		const hour = Number(session.created_at.slice(11, 13));
+		const hour = Number(session.read_at.slice(11, 13));
 		if (Number.isNaN(hour)) return false;
 		return startHour <= endHour
 			? hour >= startHour && hour < endHour

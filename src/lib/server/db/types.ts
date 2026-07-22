@@ -51,5 +51,8 @@ export interface ReadingSessionRow {
 	book_id: number;
 	position: number;
 	position_type: PositionType;
+	/** When the reading actually happened (chosen for after-the-fact logs; = created_at for live logs). */
+	read_at: string;
+	/** When the row was recorded — immutable audit/order key. */
 	created_at: string;
 }

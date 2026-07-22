@@ -120,7 +120,8 @@ export function getCurrentlyReading(userId: number): ReadingEntryWithBook[] {
 		.prepare(
 			`SELECT re.*, b.title, b.author, b.cover_url, b.page_count,
 			        ls.position as latest_position, ls.position_type as latest_position_type,
-			        ls.created_at as latest_session_at
+			        (SELECT MAX(rs.read_at) FROM reading_sessions rs
+			         WHERE rs.user_id = re.user_id AND rs.book_id = re.book_id) as latest_session_at
 			 FROM reading_entries re
 			 JOIN books b ON b.id = re.book_id
 			 ${LATEST_SESSION_JOIN}
@@ -296,7 +297,8 @@ export function getFamilyCurrentlyReading(householdId: number): ReadingEntryWith
 		.prepare(
 			`SELECT re.*, b.title, b.author, b.cover_url, b.page_count,
 			        ls.position as latest_position, ls.position_type as latest_position_type,
-			        ls.created_at as latest_session_at,
+			        (SELECT MAX(rs.read_at) FROM reading_sessions rs
+			         WHERE rs.user_id = re.user_id AND rs.book_id = re.book_id) as latest_session_at,
 			        u.name as user_name, u.avatar_emoji as user_avatar_emoji, u.avatar_color as user_avatar_color
 			 FROM reading_entries re
 			 JOIN books b ON b.id = re.book_id
@@ -338,7 +340,7 @@ export function getFamilyRecentlyFinished(
  */
 export function getReadingStreak(userId: number): number {
 	const sessionDays = db
-		.prepare(`SELECT DISTINCT date(created_at) AS day FROM reading_sessions WHERE user_id = ?`)
+		.prepare(`SELECT DISTINCT date(read_at) AS day FROM reading_sessions WHERE user_id = ?`)
 		.all(userId) as { day: string }[];
 	const finishDays = db
 		.prepare(

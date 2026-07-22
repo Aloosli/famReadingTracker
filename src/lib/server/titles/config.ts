@@ -208,6 +208,23 @@ export const SEASONAL_WINDOWS: Record<string, { start: [number, number]; end: [n
 	};
 
 /**
+ * When a reader logs after the fact, they pick a rough time of day rather than a clock time. Each
+ * bucket maps to a representative UTC hour, used as the session's read_at hour. The morning and
+ * night hours are deliberately chosen to fall inside the Early Bird and Night Owl windows below
+ * (earlyBird [5,8), nightOwl [22,5)) so a genuine early-morning or late-night read logged later can
+ * still earn those patches; afternoon and evening sit clear of both. Keep these in step with those
+ * windows if you ever retune them.
+ */
+export const READING_TIME_OF_DAY = {
+	morning: 6,
+	afternoon: 14,
+	evening: 19,
+	night: 23
+} as const;
+
+export type ReadingTimeOfDay = keyof typeof READING_TIME_OF_DAY;
+
+/**
  * Hidden trigger thresholds — the actual bar for each title. Never surfaced in the UI;
  * tune freely without touching any client code.
  */

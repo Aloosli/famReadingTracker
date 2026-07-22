@@ -132,7 +132,7 @@ export function evaluateTitles(userId: number): TitleGrant[] {
 
 	// Seasonal patches: earned once, if any reading activity fell inside a season's window.
 	const activityDates = [
-		...sessions.map((s) => s.created_at),
+		...sessions.map((s) => s.read_at),
 		...finished.map((entry) => entry.finished_at).filter((d): d is string => d != null)
 	];
 	for (const [key, window] of Object.entries(SEASONAL_WINDOWS)) {

@@ -59,6 +59,12 @@ CREATE TABLE IF NOT EXISTS reading_sessions (
 	book_id INTEGER NOT NULL REFERENCES books(id) ON DELETE CASCADE,
 	position INTEGER NOT NULL,
 	position_type TEXT NOT NULL CHECK (position_type IN ('page', 'percent')),
+	-- When the reading actually happened. For a live log this equals created_at; for an
+	-- after-the-fact log it's the date/time the reader chose. Every "when did they read"
+	-- question — streaks, time-of-day patches, seasonal windows — reads this, never created_at.
+	read_at TEXT NOT NULL DEFAULT (datetime('now')),
+	-- When the row was recorded. Immutable audit/order key: the most recently recorded session
+	-- is the reader's current position, even if an older reading date was filled in afterwards.
 	created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

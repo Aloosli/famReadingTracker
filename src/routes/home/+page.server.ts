@@ -21,11 +21,35 @@ import { isReaction } from '$lib/reactions';
 import { logProgress as saveProgress, checkInToday } from '$lib/server/db/sessions';
 import type { PositionType } from '$lib/server/db/types';
 import { evaluateTitles, revokeFinishDependentTitles } from '$lib/server/titles/engine';
+import { READING_TIME_OF_DAY, type ReadingTimeOfDay } from '$lib/server/titles/config';
 import { getPatchesForUser, setActiveTitle as applyActiveTitle } from '$lib/server/db/titles';
 import { getWishlist, removeFromWishlist as removeWishlistItem } from '$lib/server/db/wishlist';
 import type { Actions, PageServerLoad } from './$types';
 
 const PROFILE_COOKIE = 'profile_id';
+
+/** Sentinel distinguishing "no reading date supplied" (undefined) from "a date that didn't parse". */
+const INVALID_READ_AT = '\0invalid';
+
+/**
+ * Turns the log form's "when did you read this?" answer into a read_at datetime for logProgress.
+ *  - `readWhen` unset or 'now' → undefined (a live log; logProgress defaults read_at to now).
+ *  - a 'YYYY-MM-DD' date + a rough time bucket → that day at the bucket's representative UTC hour,
+ *    clamped so it can never land in the future. A malformed date returns INVALID_READ_AT.
+ */
+function resolveReadAt(readWhen: string | undefined, readTime: string | undefined): string | undefined {
+	if (!readWhen || readWhen === 'now') return undefined;
+	if (!/^\d{4}-\d{2}-\d{2}$/.test(readWhen)) return INVALID_READ_AT;
+	const parsed = new Date(`${readWhen}T00:00:00Z`);
+	if (Number.isNaN(parsed.getTime())) return INVALID_READ_AT;
+
+	const bucket = (readTime ?? '') as ReadingTimeOfDay;
+	const hour = READING_TIME_OF_DAY[bucket] ?? READING_TIME_OF_DAY.evening;
+	const candidate = `${readWhen} ${String(hour).padStart(2, '0')}:00:00`;
+	// Same "YYYY-MM-DD HH:MM:SS" shape, so a lexical compare is a chronological one.
+	const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+	return candidate > now ? now : candidate;
+}
 
 export const load: PageServerLoad = ({ cookies }) => {
 	const profileId = cookies.get(PROFILE_COOKIE);
@@ -152,7 +176,12 @@ export const actions: Actions = {
 			return fail(400, { message: 'Percent must be between 0 and 100.' });
 		}
 
-		saveProgress(user.id, bookId, Math.round(position), positionType);
+		const readAt = resolveReadAt(data.get('readWhen')?.toString(), data.get('readTime')?.toString());
+		if (readAt === INVALID_READ_AT) {
+			return fail(400, { message: 'Pick a valid reading date.' });
+		}
+
+		saveProgress(user.id, bookId, Math.round(position), positionType, readAt);
 		const grants = evaluateTitles(user.id);
 		return { success: true, grants };
 	},
