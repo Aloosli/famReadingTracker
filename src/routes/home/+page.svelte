@@ -244,27 +244,25 @@
 		</section>
 	{/if}
 
-	<section class="streak-hero">
-		<div class="streak-flame" class:cold={data.streak === 0} aria-hidden="true">🔥</div>
-		<div class="streak-main">
-			<span class="streak-number">{Math.round(streakCount.current)}</span>
-			<span class="streak-word">day streak</span>
-		</div>
-		<div
-			class="streak-freezes"
-			title="Read a big chunk in one sitting to bank a freeze. It saves your streak if you miss a day."
-		>
-			{#each Array.from({ length: MAX_FREEZES }) as _, i (i)}
-				<span class="freeze-slot" class:filled={i < (data.streakFreezes ?? 0)}>🧊</span>
-			{/each}
-			<span class="freeze-label">{(data.streakFreezes ?? 0) ? 'freezes ready' : 'no freezes yet'}</span>
-		</div>
-	</section>
-	{#if data.freezeUsed > 0}
-		<p class="freeze-note" role="status">🧊 A streak freeze kept your streak alive — nice sitting!</p>
-	{/if}
-
 	<section class="stats">
+		<div class="stat-card streak-card">
+			<span class="streak-flame" class:cold={data.streak === 0} aria-hidden="true">🔥</span>
+			<div class="streak-text">
+				<span class="stat-value">{Math.round(streakCount.current)}</span>
+				<span class="stat-label">day streak</span>
+			</div>
+			<div
+				class="streak-freezes"
+				title="Beat your usual reading pace in one sitting to bank a freeze — it saves your streak if you miss a day."
+			>
+				<div class="freeze-slots">
+					{#each Array.from({ length: MAX_FREEZES }) as _, i (i)}
+						<span class="freeze-slot" class:filled={i < (data.streakFreezes ?? 0)}>🧊</span>
+					{/each}
+				</div>
+				<span class="freeze-label">{(data.streakFreezes ?? 0) ? 'freezes ready' : 'no freezes yet'}</span>
+			</div>
+		</div>
 		<div class="stat-card goal-card">
 			<div class="goal-header">
 				{#if editingGoal}
@@ -313,6 +311,10 @@
 			</div>
 		</div>
 	</section>
+
+	{#if data.freezeUsed > 0}
+		<p class="freeze-note" role="status">🧊 A streak freeze kept your streak alive — nice sitting!</p>
+	{/if}
 
 	{#if data.familyGoal}
 		{@const fg = data.familyGoal}
@@ -1111,64 +1113,49 @@
 		text-decoration: none;
 	}
 
-	/* The streak is the hero of the shelf now — a big warm card with the flame, the count, and the
-	   banked freezes that protect it. */
-	.streak-hero {
-		display: flex;
+	/* The streak sits quietly alongside the other cards — same surface, just a muted warm border and
+	   a bigger flame as the anchor. */
+	.streak-card {
+		flex: 1 1 240px;
+		flex-direction: row;
 		align-items: center;
-		gap: 1rem;
-		background: linear-gradient(135deg, #ff8a3d, #e0762f);
-		color: #fff;
-		border-radius: var(--radius-md);
-		padding: 1.1rem 1.4rem;
-		box-shadow: 0 6px 18px var(--color-shadow);
+		gap: 0.75rem;
+		border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
 	}
 
 	.streak-flame {
-		font-size: 2.6rem;
+		font-size: 2.1rem;
 		line-height: 1;
-		filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.25));
 	}
 
 	.streak-flame.cold {
 		filter: grayscale(1);
-		opacity: 0.7;
+		opacity: 0.6;
 	}
 
-	.streak-main {
+	.streak-text {
 		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-		flex: 1;
-		min-width: 0;
-	}
-
-	.streak-number {
-		font-family: var(--font-heading);
-		font-size: 2.8rem;
-		font-weight: 800;
-		line-height: 1;
-	}
-
-	.streak-word {
-		font-size: 1rem;
-		font-weight: 600;
-		opacity: 0.95;
+		flex-direction: column;
+		gap: 0.15rem;
 	}
 
 	.streak-freezes {
+		margin-left: auto;
 		display: flex;
-		align-items: center;
-		gap: 0.2rem;
-		flex-wrap: wrap;
-		justify-content: flex-end;
-		max-width: 6.5rem;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: 0.15rem;
+	}
+
+	.freeze-slots {
+		display: flex;
+		gap: 0.15rem;
 	}
 
 	.freeze-slot {
-		font-size: 1.2rem;
+		font-size: 1rem;
 		line-height: 1;
-		opacity: 0.28;
+		opacity: 0.3;
 		filter: grayscale(1);
 	}
 
@@ -1178,11 +1165,9 @@
 	}
 
 	.freeze-label {
-		flex-basis: 100%;
-		text-align: right;
-		font-size: 0.7rem;
+		font-size: 0.68rem;
 		font-weight: 600;
-		opacity: 0.9;
+		color: var(--color-text-muted);
 	}
 
 	.freeze-note {

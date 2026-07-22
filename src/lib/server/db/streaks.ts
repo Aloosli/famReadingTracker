@@ -1,5 +1,12 @@
 import { db } from './index';
-import { FREEZE_EARN_PAGES, MAX_STREAK_FREEZES, planFreezeConsumption } from '../streak';
+import {
+	FREEZE_WINDOW,
+	MAX_STREAK_FREEZES,
+	freezeThreshold,
+	planFreezeConsumption,
+	sittingAdvancements,
+	type SittingSession
+} from '../streak';
 
 /**
  * Every day a reader was genuinely active — a logged reading session (by when the reading happened,
@@ -70,40 +77,36 @@ export function maintainStreakFreezes(userId: number, now: Date = new Date()): {
 }
 
 /**
- * Awards a streak freeze when the reader's most recent log advanced them by an impressive number of
- * pages in one sitting (>= FREEZE_EARN_PAGES), capped at MAX_STREAK_FREEZES. Call right after saving
- * a progress log. Percent logs convert to pages via the book's page count; a book without one can't
- * be judged and never earns. Returns whether one was earned and the new balance.
+ * Awards a streak freeze when the reader's most recent sitting beat their own rolling pace — the
+ * pages advanced in this log clear `freezeThreshold` of their recent sittings (see streak.ts).
+ * Per-profile, capped at MAX_STREAK_FREEZES. Call right after saving a progress log. Returns whether
+ * one was earned and the new balance.
  */
-export function awardFreezeForBigLog(
-	userId: number,
-	bookId: number
-): { earned: boolean; freezes: number } {
-	const rows = db
-		.prepare(
-			`SELECT rs.position, rs.position_type, b.page_count
-			 FROM reading_sessions rs JOIN books b ON b.id = rs.book_id
-			 WHERE rs.user_id = ? AND rs.book_id = ?
-			 ORDER BY rs.created_at DESC, rs.id DESC LIMIT 2`
-		)
-		.all(userId, bookId) as { position: number; position_type: string; page_count: number | null }[];
-
+export function awardFreezeForBigLog(userId: number): { earned: boolean; freezes: number } {
 	const current = getStreakFreezes(userId);
-	if (rows.length === 0) return { earned: false, freezes: current };
+	if (current >= MAX_STREAK_FREEZES) return { earned: false, freezes: current };
 
-	const toPages = (r: { position: number; position_type: string; page_count: number | null }) =>
-		r.position_type === 'page'
-			? r.position
-			: r.page_count && r.page_count > 0
-				? Math.round((r.position / 100) * r.page_count)
-				: null;
+	// Every session chronologically, so per-book advancement (and the just-saved sitting, last) is
+	// computed against the furthest point reached before it.
+	const sessions = db
+		.prepare(
+			`SELECT rs.book_id, rs.position, rs.position_type, b.page_count
+			 FROM reading_sessions rs JOIN books b ON b.id = rs.book_id
+			 WHERE rs.user_id = ? ORDER BY rs.created_at, rs.id`
+		)
+		.all(userId) as SittingSession[];
 
-	const nowPages = toPages(rows[0]);
-	const prevPages = rows[1] ? toPages(rows[1]) : 0;
-	if (nowPages == null || prevPages == null) return { earned: false, freezes: current };
+	const advances = sittingAdvancements(sessions);
+	const thisSitting = advances[advances.length - 1];
+	if (thisSitting == null) return { earned: false, freezes: current }; // couldn't be measured
 
-	const advanced = nowPages - prevPages;
-	if (advanced >= FREEZE_EARN_PAGES && current < MAX_STREAK_FREEZES) {
+	// Baseline = the reader's prior measurable sittings (this one excluded), last FREEZE_WINDOW of them.
+	const baseline = advances
+		.slice(0, -1)
+		.filter((a): a is number => a != null)
+		.slice(-FREEZE_WINDOW);
+
+	if (thisSitting >= freezeThreshold(baseline)) {
 		db.prepare(`UPDATE users SET streak_freezes = streak_freezes + 1 WHERE id = ?`).run(userId);
 		return { earned: true, freezes: current + 1 };
 	}

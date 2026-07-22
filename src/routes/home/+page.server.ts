@@ -210,8 +210,8 @@ export const actions: Actions = {
 		}
 
 		saveProgress(user.id, bookId, Math.round(position), positionType, readAt);
-		// A big enough jump in one sitting banks a streak freeze (unless already at the cap).
-		const freeze = awardFreezeForBigLog(user.id, bookId);
+		// A sitting that beats the reader's own rolling pace banks a streak freeze (unless at the cap).
+		const freeze = awardFreezeForBigLog(user.id);
 		const grants = evaluateTitles(user.id);
 		return { success: true, grants, freezeEarned: freeze.earned };
 	},
