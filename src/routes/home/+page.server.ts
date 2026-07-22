@@ -23,6 +23,7 @@ import type { PositionType } from '$lib/server/db/types';
 import { evaluateTitles, revokeFinishDependentTitles } from '$lib/server/titles/engine';
 import { READING_TIME_OF_DAY, type ReadingTimeOfDay } from '$lib/server/titles/config';
 import { getPatchesForUser, setActiveTitle as applyActiveTitle } from '$lib/server/db/titles';
+import { getActiveGoal, getGoalProgress } from '$lib/server/db/goals';
 import { getWishlist, removeFromWishlist as removeWishlistItem } from '$lib/server/db/wishlist';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -57,6 +58,14 @@ export const load: PageServerLoad = ({ cookies }) => {
 	if (!user) {
 		redirect(302, '/');
 	}
+
+	// A compact read-only view of the family goal so everyone sees the shared bar from their shelf.
+	// (The Family page owns setting it and celebrating when it's reached.)
+	const activeGoal = getActiveGoal(user.household_id);
+	const familyGoal = activeGoal
+		? { title: activeGoal.title, emoji: activeGoal.emoji, progress: getGoalProgress(activeGoal) }
+		: null;
+
 	return {
 		user,
 		currentlyReading: getCurrentlyReading(user.id),
@@ -65,7 +74,8 @@ export const load: PageServerLoad = ({ cookies }) => {
 		bookshelf: getFinishedShelf(user.id),
 		wishlist: getWishlist(user.id),
 		setAside: getSetAside(user.id),
-		patches: getPatchesForUser(user.id)
+		patches: getPatchesForUser(user.id),
+		familyGoal
 	};
 };
 

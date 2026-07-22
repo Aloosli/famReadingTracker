@@ -288,6 +288,24 @@
 		</div>
 	</section>
 
+	{#if data.familyGoal}
+		{@const fg = data.familyGoal}
+		<a class="family-goal-strip" href="/family" aria-label="Family goal: {fg.title}">
+			<span class="fgs-emoji" aria-hidden="true">{fg.emoji}</span>
+			<div class="fgs-body">
+				<div class="fgs-top">
+					<span class="fgs-title">{fg.title}</span>
+					<span class="fgs-nums"
+						>{fg.progress.total.toLocaleString()} / {fg.progress.target.toLocaleString()}</span
+					>
+				</div>
+				<div class="fgs-bar">
+					<div class="fgs-bar-fill" style:width="{fg.progress.percent}%"></div>
+				</div>
+			</div>
+		</a>
+	{/if}
+
 	<div class="action-row">
 		<a href="/add" class="add-book-button">+ Add a book</a>
 		<a href="/family" class="family-link">👨‍👩‍👧‍👦 Family shelf</a>
@@ -966,6 +984,68 @@
 		align-items: center;
 		gap: 1.25rem;
 		flex-wrap: wrap;
+	}
+
+	/* Compact, read-only view of the shared family goal; links through to the Family page. */
+	.family-goal-strip {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-decoration: none;
+		background: var(--color-surface);
+		border-radius: var(--radius-md);
+		box-shadow: 0 4px 12px var(--color-shadow);
+		padding: 0.7rem 0.9rem;
+	}
+
+	.fgs-emoji {
+		font-size: 1.5rem;
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	.fgs-body {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.fgs-top {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem;
+		margin-bottom: 0.35rem;
+	}
+
+	.fgs-title {
+		font-weight: 700;
+		color: var(--color-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.fgs-nums {
+		flex-shrink: 0;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+	}
+
+	.fgs-bar {
+		height: 10px;
+		border-radius: 999px;
+		background: var(--color-bg-alt);
+		overflow: hidden;
+		box-shadow: inset 0 1px 3px var(--color-shadow);
+	}
+
+	.fgs-bar-fill {
+		height: 100%;
+		border-radius: 999px;
+		background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
+		transition: width 0.6s var(--spring, ease);
+		min-width: 0.4rem;
 	}
 
 	.family-link {

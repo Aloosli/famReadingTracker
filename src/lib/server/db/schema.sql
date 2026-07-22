@@ -81,6 +81,22 @@ CREATE TABLE IF NOT EXISTS wishlist (
 
 CREATE INDEX IF NOT EXISTS idx_wishlist_user ON wishlist(user_id);
 
+-- A shared, cooperative reading goal for a household — everyone's pages read fill one bar toward a
+-- real-world reward (e.g. a cinema trip). One live campaign at a time (achieved_at IS NULL);
+-- reached goals are kept as mementos. Progress counts pages read since started_at (see db/goals.ts).
+CREATE TABLE IF NOT EXISTS family_goals (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	household_id INTEGER NOT NULL REFERENCES households(id) ON DELETE CASCADE,
+	title TEXT NOT NULL,
+	emoji TEXT NOT NULL DEFAULT '🎯',
+	target_pages INTEGER NOT NULL,
+	started_at TEXT NOT NULL DEFAULT (datetime('now')),
+	achieved_at TEXT,
+	created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_family_goals_household ON family_goals(household_id);
+
 CREATE TABLE IF NOT EXISTS titles (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	key TEXT NOT NULL UNIQUE,
