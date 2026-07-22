@@ -1,12 +1,25 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
 	import { computeProgress, progressFillBackground } from '$lib/progress';
 	import { reactionEmoji } from '$lib/reactions';
+	import { playChime, playSparkle } from '$lib/sound.svelte';
 	import TitleBanner from '$lib/components/TitleBanner.svelte';
 	import PatchInfoModal from '$lib/components/PatchInfoModal.svelte';
+	import CelebrationToast from '$lib/components/CelebrationToast.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
+
+	// When the family just crossed the goal line, fire a one-off confetti burst + chime.
+	let goalDismissed = $state(false);
+	const goalCelebration = $derived(!goalDismissed ? data.justAchieved : null);
+	onMount(() => {
+		if (data.justAchieved) {
+			playChime();
+			setTimeout(playSparkle, 220);
+		}
+	});
 
 	// Tap a reader's patch to see what they earned it for.
 	let selectedPatch: { emoji: string; label: string; color: string; description: string } | null =
@@ -271,6 +284,15 @@
 		color={selectedPatch.color}
 		description={selectedPatch.description}
 		onclose={() => (selectedPatch = null)}
+	/>
+{/if}
+
+{#if goalCelebration}
+	<CelebrationToast
+		message="{goalCelebration.goal.title} unlocked! {goalCelebration.progress.total.toLocaleString()} pages read together."
+		emoji={goalCelebration.goal.emoji}
+		accentColor="var(--color-accent)"
+		onDismiss={() => (goalDismissed = true)}
 	/>
 {/if}
 

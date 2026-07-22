@@ -87,8 +87,9 @@ interface SessionRow extends SessionPos {
 	page_count: number | null;
 }
 
-/** Pages a reader has advanced across all their books since the goal started. */
-function pagesReadSince(userId: number, startedAt: string): number {
+/** Pages a reader has advanced across all their books since a given datetime (e.g. goal start, or
+ *  the start of today for a "you added +X today" nudge). */
+export function pagesReadSince(userId: number, startedAt: string): number {
 	const sessions = db
 		.prepare(
 			`SELECT rs.book_id, rs.position, rs.position_type, rs.read_at, b.page_count

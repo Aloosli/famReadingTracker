@@ -290,18 +290,30 @@
 
 	{#if data.familyGoal}
 		{@const fg = data.familyGoal}
-		<a class="family-goal-strip" href="/family" aria-label="Family goal: {fg.title}">
+		<a
+			class="family-goal-strip"
+			class:reached={fg.progress.reached}
+			href="/family"
+			aria-label="Family goal: {fg.title}"
+		>
 			<span class="fgs-emoji" aria-hidden="true">{fg.emoji}</span>
 			<div class="fgs-body">
 				<div class="fgs-top">
 					<span class="fgs-title">{fg.title}</span>
-					<span class="fgs-nums"
-						>{fg.progress.total.toLocaleString()} / {fg.progress.target.toLocaleString()}</span
-					>
+					{#if fg.progress.reached}
+						<span class="fgs-nums fgs-reached">🎉 Reached!</span>
+					{:else}
+						<span class="fgs-nums"
+							>{fg.progress.total.toLocaleString()} / {fg.progress.target.toLocaleString()}</span
+						>
+					{/if}
 				</div>
 				<div class="fgs-bar">
 					<div class="fgs-bar-fill" style:width="{fg.progress.percent}%"></div>
 				</div>
+				{#if fg.myTodayPages > 0}
+					<p class="fgs-today">💪 You've added <strong>+{fg.myTodayPages.toLocaleString()}</strong> pages today</p>
+				{/if}
 			</div>
 		</a>
 	{/if}
@@ -1046,6 +1058,25 @@
 		background: linear-gradient(90deg, var(--color-accent), var(--color-accent-hover));
 		transition: width 0.6s var(--spring, ease);
 		min-width: 0.4rem;
+	}
+
+	.fgs-today {
+		margin: 0.4rem 0 0;
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+	}
+
+	.fgs-today strong {
+		color: var(--color-accent);
+	}
+
+	.fgs-reached {
+		color: var(--color-accent);
+		font-weight: 700;
+	}
+
+	.family-goal-strip.reached {
+		outline: 2px solid var(--color-accent);
 	}
 
 	.family-link {
