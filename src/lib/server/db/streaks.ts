@@ -89,10 +89,14 @@ export function maintainStreakFreezes(userId: number, now: Date = new Date()): {
 /**
  * Awards a streak freeze when the reader's most recent sitting beat their own rolling pace — the
  * pages advanced in this log clear `freezeThreshold` of their recent sittings (see streak.ts).
- * Per-profile, capped at MAX_STREAK_FREEZES. Call right after saving a progress log. Returns whether
- * one was earned and the new balance.
+ * Per-profile, capped at MAX_STREAK_FREEZES. Call right after saving a progress log, passing the id
+ * of the sitting just saved so the freeze can be taken back if that log is later corrected away.
+ * Returns whether one was earned and the new balance.
  */
-export function awardFreezeForBigLog(userId: number): { earned: boolean; freezes: number } {
+export function awardFreezeForBigLog(
+	userId: number,
+	sessionId?: number
+): { earned: boolean; freezes: number } {
 	const current = getStreakFreezes(userId);
 	if (current >= MAX_STREAK_FREEZES) return { earned: false, freezes: current };
 
@@ -117,8 +121,21 @@ export function awardFreezeForBigLog(userId: number): { earned: boolean; freezes
 		.slice(-FREEZE_WINDOW);
 
 	if (thisSitting >= freezeThreshold(baseline)) {
-		db.prepare(`INSERT INTO freeze_bank (user_id) VALUES (?)`).run(userId);
+		db.prepare(`INSERT INTO freeze_bank (user_id, session_id) VALUES (?, ?)`).run(
+			userId,
+			sessionId ?? null
+		);
 		return { earned: true, freezes: current + 1 };
 	}
 	return { earned: false, freezes: current };
+}
+
+/**
+ * Takes back the freeze a sitting earned, for when that sitting is corrected or deleted — a
+ * mistyped "page 250" shouldn't leave a freeze behind. Only ever removes a *banked* freeze: one
+ * already spent to bridge a missed day has become a protected day in streak_freeze_days, and
+ * un-protecting a day the reader has already been told is safe would silently break their streak.
+ */
+export function revokeFreezeForSession(userId: number, sessionId: number): void {
+	db.prepare(`DELETE FROM freeze_bank WHERE user_id = ? AND session_id = ?`).run(userId, sessionId);
 }

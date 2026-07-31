@@ -18,13 +18,28 @@ import {
 	unfinishEntry
 } from '$lib/server/db/entries';
 import { isReaction } from '$lib/reactions';
-import { logProgress as saveProgress, checkInToday } from '$lib/server/db/sessions';
+import {
+	logProgress as saveProgress,
+	checkInToday,
+	deleteSession,
+	getRecentSessionsForBook,
+	updateSession
+} from '$lib/server/db/sessions';
 import type { PositionType } from '$lib/server/db/types';
-import { evaluateTitles, revokeFinishDependentTitles } from '$lib/server/titles/engine';
+import {
+	evaluateTitles,
+	revokeFinishDependentTitles,
+	revokeSessionDependentTitles
+} from '$lib/server/titles/engine';
 import { READING_TIME_OF_DAY, type ReadingTimeOfDay } from '$lib/server/titles/config';
 import { getPatchesForUser, setActiveTitle as applyActiveTitle } from '$lib/server/db/titles';
 import { getActiveGoal, getGoalProgress, pagesReadSince } from '$lib/server/db/goals';
-import { awardFreezeForBigLog, getStreakFreezes, maintainStreakFreezes } from '$lib/server/db/streaks';
+import {
+	awardFreezeForBigLog,
+	getStreakFreezes,
+	maintainStreakFreezes,
+	revokeFreezeForSession
+} from '$lib/server/db/streaks';
 import { getWishlist, removeFromWishlist as removeWishlistItem } from '$lib/server/db/wishlist';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -82,9 +97,15 @@ export const load: PageServerLoad = ({ cookies }) => {
 	// streak. `freezeUsed` is >0 only on the load that actually consumes one, so the page can note it.
 	const { consumed: freezeUsed } = maintainStreakFreezes(user.id);
 
+	// Each book carries its recent sittings so a mistyped page can be found and corrected in place.
+	const currentlyReading = getCurrentlyReading(user.id).map((entry) => ({
+		...entry,
+		sessions: getRecentSessionsForBook(user.id, entry.book_id)
+	}));
+
 	return {
 		user,
-		currentlyReading: getCurrentlyReading(user.id),
+		currentlyReading,
 		streak: getReadingStreak(user.id),
 		streakFreezes: getStreakFreezes(user.id),
 		freezeUsed,
@@ -209,11 +230,71 @@ export const actions: Actions = {
 			return fail(400, { message: 'Pick a valid reading date.' });
 		}
 
-		saveProgress(user.id, bookId, Math.round(position), positionType, readAt);
+		const session = saveProgress(user.id, bookId, Math.round(position), positionType, readAt);
 		// A sitting that beats the reader's own rolling pace banks a streak freeze (unless at the cap).
-		const freeze = awardFreezeForBigLog(user.id);
+		// The session id goes with it, so correcting this log later can take the freeze back.
+		const freeze = awardFreezeForBigLog(user.id, session.id);
 		const grants = evaluateTitles(user.id);
 		return { success: true, grants, freezeEarned: freeze.earned };
+	},
+	editSession: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const sessionId = Number(data.get('sessionId'));
+		const position = Number(data.get('position'));
+		const positionType: PositionType = data.get('positionType') === 'percent' ? 'percent' : 'page';
+
+		if (!sessionId || !Number.isFinite(position) || position < 0) {
+			return fail(400, { message: 'Enter a valid position.' });
+		}
+		if (positionType === 'percent' && position > 100) {
+			return fail(400, { message: 'Percent must be between 0 and 100.' });
+		}
+
+		// An empty date means "leave the reading date alone" — they're only fixing the number.
+		const readWhen = data.get('readWhen')?.toString().trim();
+		const readAt = readWhen ? resolveReadAt(readWhen, data.get('readTime')?.toString()) : undefined;
+		if (readAt === INVALID_READ_AT) {
+			return fail(400, { message: 'Pick a valid reading date.' });
+		}
+
+		if (!updateSession(sessionId, user.id, Math.round(position), readAt)) {
+			return fail(404, { message: "That log isn't there any more." });
+		}
+
+		// The correction may have pulled the history back below a patch it had reached, and may have
+		// undone the big sitting that banked a freeze.
+		revokeFreezeForSession(user.id, sessionId);
+		revokeSessionDependentTitles(user.id);
+		const grants = evaluateTitles(user.id);
+		return { success: true, grants };
+	},
+	deleteSession: async ({ request, cookies }) => {
+		const profileId = cookies.get(PROFILE_COOKIE);
+		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		if (!user) {
+			return fail(401, { message: 'No active profile — pick one first.' });
+		}
+
+		const data = await request.formData();
+		const sessionId = Number(data.get('sessionId'));
+		if (!sessionId) {
+			return fail(400, { message: 'Missing log to remove.' });
+		}
+
+		// Take the freeze back before the row goes: ON DELETE SET NULL would otherwise orphan the link.
+		revokeFreezeForSession(user.id, sessionId);
+		if (!deleteSession(sessionId, user.id)) {
+			return fail(404, { message: "That log isn't there any more." });
+		}
+
+		revokeSessionDependentTitles(user.id);
+		return { success: true };
 	},
 	checkIn: async ({ request, cookies }) => {
 		const profileId = cookies.get(PROFILE_COOKIE);

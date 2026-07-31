@@ -143,6 +143,54 @@ export function evaluateTitles(userId: number): TitleGrant[] {
 }
 
 /**
+ * Called after a logged sitting is corrected or deleted. Every patch whose trigger reads the session
+ * history is re-checked against what's left, and revoked if the reading that earned it is gone — so
+ * a mistyped "page 250" doesn't leave a badge behind, and doesn't spend the surprise of earning it
+ * for real later. The finish-driven patches are untouched here: no session edit can change them
+ * (see revokeFinishDependentTitles for those).
+ *
+ * Seasonal patches are re-checked against finishes as well as sessions, since either counts as
+ * activity inside a season's window.
+ */
+export function revokeSessionDependentTitles(userId: number): void {
+	const sessions = getSessionsForUser(userId);
+	const finished = getFinishedEntries(userId);
+
+	if (!hasBurstOfSessions(sessions, THRESHOLDS.speedDemonMinLogs, THRESHOLDS.speedDemonWindowHours)) {
+		revokeTitle(userId, 'speed_demon');
+	}
+	const streak = consecutiveSessionDayStreak(sessions);
+	if (streak < THRESHOLDS.unstoppableDays) {
+		revokeTitle(userId, 'unstoppable');
+	}
+	if (streak < THRESHOLDS.ironStreakDays) {
+		revokeTitle(userId, 'iron_streak');
+	}
+	if (!hasComebackGap(sessions, THRESHOLDS.comebackGapDays)) {
+		revokeTitle(userId, 'comeback_kid');
+	}
+	if (!hasWeekendPair(sessions)) {
+		revokeTitle(userId, 'weekend_warrior');
+	}
+	if (!hasSessionInHourWindow(sessions, THRESHOLDS.nightOwlStartHour, THRESHOLDS.nightOwlEndHour)) {
+		revokeTitle(userId, 'night_owl');
+	}
+	if (!hasSessionInHourWindow(sessions, THRESHOLDS.earlyBirdStartHour, THRESHOLDS.earlyBirdEndHour)) {
+		revokeTitle(userId, 'early_bird');
+	}
+
+	const activityDates = [
+		...sessions.map((s) => s.read_at),
+		...finished.map((entry) => entry.finished_at).filter((d): d is string => d != null)
+	];
+	for (const [key, window] of Object.entries(SEASONAL_WINDOWS)) {
+		if (!activityDates.some((date) => dateInSeasonWindow(date, window))) {
+			revokeTitle(userId, key);
+		}
+	}
+}
+
+/**
  * Called after un-finishing a book. Only the permanent finish-milestone titles are re-checked
  * and revoked when no longer supported — so a mis-tapped finish doesn't leave a badge behind
  * (and doesn't "spend" the surprise the next time it's earned for real). Temporary/session-based

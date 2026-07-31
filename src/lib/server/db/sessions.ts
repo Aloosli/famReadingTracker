@@ -43,6 +43,55 @@ export function getSessionsForUser(userId: number): ReadingSessionRow[] {
 }
 
 /**
+ * A reader's most recent sittings for one book, newest first — the "what have I logged?" list that
+ * backs correcting a typo. Ordered by created_at (like getLatestSession) so the first row is always
+ * the one currently driving the energy bar, even if an older reading date was filled in afterwards.
+ */
+export function getRecentSessionsForBook(
+	userId: number,
+	bookId: number,
+	limit = 8
+): ReadingSessionRow[] {
+	return db
+		.prepare(
+			`SELECT * FROM reading_sessions
+			 WHERE user_id = ? AND book_id = ?
+			 ORDER BY created_at DESC, id DESC
+			 LIMIT ?`
+		)
+		.all(userId, bookId, limit) as ReadingSessionRow[];
+}
+
+/**
+ * Corrects a logged sitting in place. Scoped by user_id so one reader can only ever edit their own
+ * history. created_at is deliberately left alone — it's the audit/order key, and rewriting it would
+ * reshuffle which log counts as the reader's current position. Returns false if nothing matched.
+ */
+export function updateSession(
+	sessionId: number,
+	userId: number,
+	position: number,
+	readAt?: string
+): boolean {
+	const result = db
+		.prepare(
+			`UPDATE reading_sessions
+			 SET position = ?, read_at = COALESCE(?, read_at)
+			 WHERE id = ? AND user_id = ?`
+		)
+		.run(position, readAt ?? null, sessionId, userId);
+	return result.changes > 0;
+}
+
+/** Removes a logged sitting. Scoped by user_id; returns false if it wasn't theirs (or is gone). */
+export function deleteSession(sessionId: number, userId: number): boolean {
+	const result = db
+		.prepare('DELETE FROM reading_sessions WHERE id = ? AND user_id = ?')
+		.run(sessionId, userId);
+	return result.changes > 0;
+}
+
+/**
  * Records that a reader picked this book up today, without asking for a page/percent.
  * Carries the last known position forward so the energy bar doesn't move — the point is
  * to keep the streak alive, not to claim new progress. No-ops if today is already logged

@@ -181,6 +181,48 @@
 		logWhen = 'now';
 		logDate = yesterdayStr;
 		logBucket = 'evening';
+		showHistory = false;
+		editingSessionId = null;
+	}
+
+	// Correcting a sitting that was logged wrong. Only one book's panel is open at a time, so a
+	// single set of drafts serves whichever log is being fixed.
+	let showHistory = $state(false);
+	let editingSessionId: number | null = $state(null);
+	let editPosition = $state('');
+	let editDate = $state('');
+
+	type LoggedSession = PageData['currentlyReading'][number]['sessions'][number];
+
+	function startEditingSession(session: LoggedSession) {
+		editingSessionId = session.id;
+		editPosition = String(session.position);
+		editDate = session.read_at.slice(0, 10);
+	}
+
+	/** The rough time of day a stored session was read at — kept as-is when only the date changes. */
+	function bucketOf(session: LoggedSession): LogBucket {
+		const hour = Number(session.read_at.slice(11, 13));
+		if (Number.isNaN(hour)) return 'evening';
+		if (hour < 11) return 'morning';
+		if (hour < 17) return 'afternoon';
+		if (hour < 22) return 'evening';
+		return 'night';
+	}
+
+	function sessionPositionLabel(session: LoggedSession): string {
+		return session.position_type === 'percent' ? `${session.position}%` : `p. ${session.position}`;
+	}
+
+	/** "Today" / "Yesterday" / "3 Jul" — the reading date, not when the row was saved. */
+	function sessionDateLabel(readAt: string): string {
+		const day = readAt.slice(0, 10);
+		if (day === todayStr) return 'Today';
+		if (day === yesterdayStr) return 'Yesterday';
+		const date = new Date(`${day}T00:00:00Z`);
+		return Number.isNaN(date.getTime())
+			? day
+			: date.toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' });
 	}
 
 	function forgetLocally() {
@@ -567,6 +609,108 @@
 									</label>
 									<button type="submit" class="page-count-save">Save</button>
 								</form>
+
+								{#if entry.sessions.length > 0}
+									<div class="log-history">
+										<button
+											type="button"
+											class="log-history-toggle"
+											aria-expanded={showHistory}
+											onclick={() => {
+												showHistory = !showHistory;
+												editingSessionId = null;
+											}}
+										>
+											{showHistory ? 'Hide' : 'Fix a log'} · last {entry.sessions.length}
+											{entry.sessions.length === 1 ? 'sitting' : 'sittings'}
+										</button>
+										{#if showHistory}
+											<ul class="log-history-list">
+												{#each entry.sessions as session (session.id)}
+													<li class="log-history-row">
+														{#if editingSessionId === session.id}
+															<form
+																method="POST"
+																action="?/editSession"
+																class="log-history-edit"
+																use:enhance={() => {
+																	return async ({ result, update }) => {
+																		await update();
+																		if (result.type === 'success') {
+																			editingSessionId = null;
+																			queueTitleGrants(result.data);
+																		}
+																	};
+																}}
+															>
+																<input type="hidden" name="sessionId" value={session.id} />
+																<input
+																	type="hidden"
+																	name="positionType"
+																	value={session.position_type}
+																/>
+																<input type="hidden" name="readWhen" value={editDate} />
+																<input type="hidden" name="readTime" value={bucketOf(session)} />
+																<input
+																	type="number"
+																	name="position"
+																	inputmode="numeric"
+																	min="0"
+																	max={session.position_type === 'percent' ? 100 : undefined}
+																	bind:value={editPosition}
+																	aria-label={session.position_type === 'percent'
+																		? 'Percent read'
+																		: 'Page reached'}
+																	required
+																/>
+																<input
+																	type="date"
+																	aria-label="Reading date"
+																	max={todayStr}
+																	bind:value={editDate}
+																/>
+																<button type="submit" class="log-history-save">Save</button>
+																<button
+																	type="button"
+																	class="log-history-cancel"
+																	onclick={() => (editingSessionId = null)}>Cancel</button
+																>
+															</form>
+														{:else}
+															<span class="log-history-when">{sessionDateLabel(session.read_at)}</span>
+															<span class="log-history-pos">{sessionPositionLabel(session)}</span>
+															<button
+																type="button"
+																class="log-history-edit-toggle"
+																aria-label="Correct this log"
+																onclick={() => startEditingSession(session)}>Fix</button
+															>
+															<form
+																method="POST"
+																action="?/deleteSession"
+																use:enhance={() => {
+																	return async ({ update }) => {
+																		await update();
+																	};
+																}}
+															>
+																<input type="hidden" name="sessionId" value={session.id} />
+																<button
+																	type="submit"
+																	class="log-history-delete"
+																	aria-label="Delete this log">Delete</button
+																>
+															</form>
+														{/if}
+													</li>
+												{/each}
+											</ul>
+											<p class="log-history-hint">
+												Fixing a log updates your streak, pages and patches to match.
+											</p>
+										{/if}
+									</div>
+								{/if}
 							{/if}
 						</div>
 					</li>
@@ -1936,6 +2080,116 @@
 	.log-progress-save:hover,
 	.page-count-save:hover {
 		background: var(--color-accent-hover);
+	}
+
+	/* ---- Reading log — the sittings behind the energy bar, so a typo can be corrected ---- */
+	.log-history {
+		border-top: 1px dashed var(--color-border);
+		padding-top: 0.6rem;
+	}
+
+	.log-history-toggle {
+		border: none;
+		background: transparent;
+		padding: 0.2rem 0;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		cursor: pointer;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	.log-history-list {
+		list-style: none;
+		margin: 0.5rem 0 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+	}
+
+	.log-history-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+		font-size: 0.8rem;
+		padding: 0.35rem 0.5rem;
+		border-radius: var(--radius-sm);
+		background: var(--color-bg-alt);
+	}
+
+	.log-history-when {
+		color: var(--color-text-muted);
+		min-width: 4.5rem;
+	}
+
+	.log-history-pos {
+		font-weight: 700;
+		margin-right: auto;
+	}
+
+	.log-history-edit-toggle,
+	.log-history-delete,
+	.log-history-cancel {
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		font-weight: 600;
+		padding: 0.3rem 0.6rem;
+		border-radius: var(--radius-sm);
+		cursor: pointer;
+	}
+
+	.log-history-delete:hover {
+		color: var(--color-error);
+		border-color: var(--color-error);
+	}
+
+	.log-history-edit {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+		flex-wrap: wrap;
+		width: 100%;
+	}
+
+	.log-history-edit input[type='number'] {
+		width: 5rem;
+		font-size: 0.9rem;
+		padding: 0.4rem 0.5rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
+	}
+
+	.log-history-edit input[type='date'] {
+		font-size: 0.85rem;
+		padding: 0.35rem 0.5rem;
+		border-radius: var(--radius-sm);
+		border: 1px solid var(--color-border);
+		background: var(--color-bg);
+		color: var(--color-text);
+	}
+
+	.log-history-save {
+		background: var(--color-accent);
+		color: #fff;
+		border: none;
+		font-weight: 700;
+		font-size: 0.75rem;
+		padding: 0.4rem 0.8rem;
+		border-radius: var(--radius-sm);
+		cursor: pointer;
+	}
+
+	.log-history-hint {
+		margin: 0.5rem 0 0;
+		font-size: 0.7rem;
+		color: var(--color-text-muted);
 	}
 
 	/* ---- Reaction prompt (shown right after finishing) ---- */

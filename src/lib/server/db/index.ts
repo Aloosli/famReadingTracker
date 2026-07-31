@@ -88,6 +88,15 @@ if (!sessionColumns.some((column) => column.name === 'read_at')) {
 	db.exec('UPDATE reading_sessions SET read_at = created_at WHERE read_at IS NULL');
 }
 
+// Migrate databases created before a banked freeze remembered which sitting earned it. Existing
+// rows keep session_id NULL, which simply means "unattributable" — they're never clawed back.
+const freezeColumns = db.prepare('PRAGMA table_info(freeze_bank)').all() as { name: string }[];
+if (!freezeColumns.some((column) => column.name === 'session_id')) {
+	db.exec(
+		'ALTER TABLE freeze_bank ADD COLUMN session_id INTEGER REFERENCES reading_sessions(id) ON DELETE SET NULL'
+	);
+}
+
 // Multi-tenancy foundation: every reader and book belongs to a household. Databases created before
 // households existed get the column added here, then adopted into a default household below.
 const userColumns = db.prepare('PRAGMA table_info(users)').all() as { name: string }[];

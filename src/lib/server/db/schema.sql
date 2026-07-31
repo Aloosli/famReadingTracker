@@ -76,6 +76,10 @@ CREATE INDEX IF NOT EXISTS idx_reading_sessions_user_book ON reading_sessions(us
 CREATE TABLE IF NOT EXISTS freeze_bank (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+	-- The sitting that earned this freeze, so correcting or deleting a mistyped log can take back
+	-- the freeze it wrongly banked. NULL for freezes banked before this was tracked, and for ones
+	-- whose session has since gone (ON DELETE SET NULL) — a NULL here just means "can't attribute".
+	session_id INTEGER REFERENCES reading_sessions(id) ON DELETE SET NULL,
 	earned_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
