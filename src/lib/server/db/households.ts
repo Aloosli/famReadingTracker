@@ -32,6 +32,14 @@ export function getDefaultHouseholdId(): number {
 	return row?.id ?? ensureDefaultHousehold();
 }
 
+/**
+ * How many families share this database. Used to gate whole-file operations (the raw .db download)
+ * that are only safe while this install belongs to exactly one household.
+ */
+export function countHouseholds(): number {
+	return (db.prepare('SELECT COUNT(*) AS n FROM households').get() as { n: number }).n;
+}
+
 export function getHouseholdById(id: number): HouseholdRow | undefined {
 	return db.prepare('SELECT * FROM households WHERE id = ?').get(id) as HouseholdRow | undefined;
 }

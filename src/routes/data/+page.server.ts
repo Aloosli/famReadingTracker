@@ -1,14 +1,27 @@
 import { fail } from '@sveltejs/kit';
-import { getBackupSummary, isValidBackup, restoreBackup } from '$lib/server/db/backup';
+import {
+	BackupRestoreError,
+	getBackupSummary,
+	isValidBackup,
+	restoreBackup
+} from '$lib/server/db/backup';
+import { requireProfile } from '$lib/server/guards';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = () => {
-	return { summary: getBackupSummary() };
+export const load: PageServerLoad = (event) => {
+	const user = requireProfile(event);
+	return { summary: getBackupSummary(user.household_id) };
 };
 
 export const actions: Actions = {
-	restore: async ({ request }) => {
-		const data = await request.formData();
+	/**
+	 * Restores this family's data from an uploaded backup. Previously this cleared every table in the
+	 * database — with a second family present that made an unauthenticated POST able to destroy
+	 * everyone's data. It now replaces only the requesting household's rows.
+	 */
+	restore: async (event) => {
+		const user = requireProfile(event);
+		const data = await event.request.formData();
 		const file = data.get('backup');
 
 		if (!(file instanceof File) || file.size === 0) {
@@ -31,7 +44,14 @@ export const actions: Actions = {
 			});
 		}
 
-		restoreBackup(parsed);
-		return { restored: true, summary: getBackupSummary() };
+		try {
+			restoreBackup(user.household_id, parsed);
+		} catch (restoreFailure) {
+			if (restoreFailure instanceof BackupRestoreError) {
+				return fail(409, { restoreError: restoreFailure.message });
+			}
+			throw restoreFailure;
+		}
+		return { restored: true, summary: getBackupSummary(user.household_id) };
 	}
 };
