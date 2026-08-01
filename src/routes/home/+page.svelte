@@ -388,10 +388,10 @@
 		</a>
 	{/if}
 
+	<!-- Family shelf and My Year moved to the tab bar, which is always reachable. Adding a book stays
+	     here as well: it's the action you want in context, right above the shelf it fills. -->
 	<div class="action-row">
 		<a href="/add" class="add-book-button">+ Add a book</a>
-		<a href="/family" class="family-link">👨‍👩‍👧‍👦 Family shelf</a>
-		<a href="/year" class="family-link">📖 My {new Date().getFullYear()}</a>
 	</div>
 
 	<section class="currently-reading">
@@ -1249,12 +1249,6 @@
 
 	.family-goal-strip.reached {
 		outline: 2px solid var(--color-accent);
-	}
-
-	.family-link {
-		font-weight: 600;
-		font-size: var(--text-base);
-		text-decoration: none;
 	}
 
 	/* The streak sits quietly alongside the other cards — same surface, just a muted warm border and

@@ -80,7 +80,6 @@
 			<h1>Family shelf</h1>
 			<p class="subtitle">What everyone's reading right now.</p>
 		</div>
-		<a href="/home" class="back-link">← My shelf</a>
 	</header>
 
 	<section class="goal-section">
@@ -577,14 +576,6 @@
 	.subtitle {
 		margin: 0.25rem 0 0;
 		color: var(--color-text-muted);
-	}
-
-	.back-link {
-		flex-shrink: 0;
-		font-weight: 600;
-		font-size: var(--text-base);
-		text-decoration: none;
-		padding: 0.5rem 0;
 	}
 
 	section h2 {

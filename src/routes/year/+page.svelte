@@ -45,8 +45,6 @@
 </svelte:head>
 
 <main>
-	<a href="/home" class="back-link">← Back to my shelf</a>
-
 	<header class="hero" style:--tile-color={data.user.avatar_color}>
 		<span class="avatar-circle">{data.user.avatar_emoji}</span>
 		<p class="hero-eyebrow">{data.user.name}'s year in books</p>
@@ -163,18 +161,6 @@
 		flex-direction: column;
 		gap: 2rem;
 		padding: 2rem 1.5rem calc(4rem + env(safe-area-inset-bottom));
-	}
-
-	.back-link {
-		align-self: flex-start;
-		font-weight: 600;
-		font-size: var(--text-base);
-		text-decoration: none;
-		color: var(--color-accent);
-	}
-
-	.back-link:hover {
-		text-decoration: underline;
 	}
 
 	/* ---- Hero ---- */

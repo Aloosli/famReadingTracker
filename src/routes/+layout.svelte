@@ -2,6 +2,7 @@
 	import '$lib/styles/global.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import ThemeSwitch from '$lib/components/ThemeSwitch.svelte';
+	import TabBar from '$lib/components/TabBar.svelte';
 	import SonicScenery from '$lib/components/SonicScenery.svelte';
 	import SoundToggle from '$lib/components/SoundToggle.svelte';
 	import { onNavigate, goto } from '$app/navigation';
@@ -113,3 +114,4 @@
 <SoundToggle />
 <ThemeSwitch />
 {@render children()}
+<TabBar />
