@@ -17,18 +17,25 @@ async function attempt(run: () => Promise<BookSearchResult[]>): Promise<BookSear
  * Finds a book, from whichever source can answer.
  *
  * Google Books is tried first — its search ranking is better for the common case. Open Library
- * backs it up in two distinct ways, because Google fails in two distinct ways for the books this
- * app is actually used for (UK children's editions, picture books, school reading-scheme titles):
+ * backs it up in two distinct ways:
  *
- *  1. Google returns nothing at all → ask Open Library instead.
+ *  1. Google returns nothing, or errors → ask Open Library instead.
  *  2. Google finds the book but omits its page count → fill that one field from Open Library.
  *
- * The second case matters more than it looks. A book with no page count that gets tracked by
- * percent contributes *nothing* to the family goal (see goal-progress.ts), so the readers whose
- * books have the thinnest metadata — the youngest ones — would quietly under-count on a bar the
- * family shares. It's only done for barcode scans, where the ISBN names exactly one physical book
- * and the two sources can be matched with confidence; for a text search the reader is offered the
- * page-count prompt on the confirm card instead.
+ * Case 1 is the one that earns its keep, and not for the reason first assumed. Measured against a
+ * sample of the books this family actually reads (Oxford Reading Tree, Project X, Zog, Horrid
+ * Henry), authenticated Google Books has *good* coverage and supplies page counts — the coverage
+ * worry was unfounded. What it does instead is fall over: 2 of 8 queries returned 503 in one run,
+ * matching the intermittent failures that made search feel unreliable. fetchWithRetry absorbs most
+ * of those; Open Library catches what's left, turning an outage into a slightly slower answer.
+ *
+ * The second case matters because a book with no page count that gets tracked by percent
+ * contributes *nothing* to the family goal (see goal-progress.ts). It is deliberately restricted to
+ * barcode scans, and the measurements above are why: the two sources report very different lengths
+ * for the same title (222 vs 24 pages for a Biff & Chip book, 12 vs 26 for The Very Hungry
+ * Caterpillar) because they describe different editions. An ISBN pins one physical book, so the
+ * sources can be matched safely; a text search cannot, and guessing there would write confidently
+ * wrong numbers into a shared goal. Text searches get the confirm card's page-count prompt instead.
  *
  * Every answer is cached (see db/lookup-cache.ts) — that's what keeps one shared API key viable
  * across many households, and what lets search keep working while an upstream is down.

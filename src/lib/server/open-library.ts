@@ -53,11 +53,13 @@ function mapDoc(doc: OpenLibraryDoc, scannedIsbn: string | null): BookSearchResu
 }
 
 /**
- * Searches Open Library. Used as a fallback when Google Books has nothing, or to fill in a page
- * count Google omitted — both of which happen most for exactly the books this app is for:
- * UK children's editions, picture books and school reading-scheme titles.
+ * Searches Open Library. Used as a fallback when Google Books has nothing *or is down*, and to fill
+ * in a page count Google omitted on a barcode scan.
  *
- * No API key and no registration, so unlike the Google path this can't be rate-limited per install.
+ * Availability is the real reason this exists: measured against the books this family reads,
+ * authenticated Google Books had good coverage but returned 503 on 2 of 8 queries. Open Library
+ * answered both. No API key and no registration, so unlike the Google path it can't be
+ * rate-limited per install — which also makes it the source that still works if a key lapses.
  */
 export async function searchOpenLibrary(query: string): Promise<BookSearchResult[]> {
 	const url = new URL(OPEN_LIBRARY_SEARCH);
