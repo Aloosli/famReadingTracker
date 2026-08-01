@@ -108,7 +108,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 	}
 
 	video {
@@ -147,7 +147,7 @@
 		background: var(--color-accent);
 		color: #fff;
 		border: none;
-		padding: 0.7rem 1.1rem;
+		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);
 		font-weight: 700;
 		font-size: var(--text-base);

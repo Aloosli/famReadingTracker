@@ -54,7 +54,7 @@
 <style>
 	.chooser {
 		display: flex;
-		gap: 1.25rem;
+		gap: var(--space-lg);
 		align-items: flex-start;
 		flex-wrap: wrap;
 	}
@@ -76,13 +76,13 @@
 		min-width: 220px;
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: var(--space-md);
 	}
 
 	.field {
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-xs);
 	}
 
 	.field-label {
@@ -94,7 +94,7 @@
 	.emoji-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-		gap: 0.4rem;
+		gap: var(--space-xs);
 	}
 
 	.emoji-option {
@@ -124,7 +124,7 @@
 	.colour-row {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: var(--space-xs);
 	}
 
 	.colour-option {

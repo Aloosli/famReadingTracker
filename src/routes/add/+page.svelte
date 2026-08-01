@@ -288,7 +288,7 @@
 		min-height: 100dvh;
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: var(--space-xl);
 		padding: 2rem 1.5rem calc(2rem + env(safe-area-inset-bottom));
 		max-width: 560px;
 		margin: 0 auto;
@@ -297,7 +297,7 @@
 	header {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: var(--space-md);
 	}
 
 	.back {
@@ -323,7 +323,7 @@
 		margin: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
+		gap: var(--space-xs);
 	}
 
 	.shelves legend {
@@ -331,21 +331,21 @@
 		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		padding: 0;
-		margin-bottom: 0.4rem;
+		margin-bottom: var(--space-xs);
 	}
 
 	.shelf-options {
 		display: flex;
-		gap: 0.5rem;
+		gap: var(--space-xs);
 		background: var(--color-bg-alt);
-		padding: 0.35rem;
+		padding: var(--space-2xs);
 		border-radius: var(--radius-md);
 	}
 
 	.shelf {
 		flex: 1;
 		text-align: center;
-		padding: 0.65rem 0.5rem;
+		padding: var(--space-sm) var(--space-xs);
 		border-radius: var(--radius-sm);
 		font-weight: 600;
 		font-size: var(--text-sm);
@@ -374,9 +374,9 @@
 
 	.tabs {
 		display: flex;
-		gap: 0.5rem;
+		gap: var(--space-xs);
 		background: var(--color-bg-alt);
-		padding: 0.35rem;
+		padding: var(--space-2xs);
 		border-radius: var(--radius-md);
 	}
 
@@ -384,7 +384,7 @@
 		flex: 1;
 		border: none;
 		background: transparent;
-		padding: 0.65rem 0.5rem;
+		padding: var(--space-sm) var(--space-xs);
 		border-radius: var(--radius-sm);
 		font-weight: 600;
 		font-size: var(--text-sm);
@@ -401,7 +401,7 @@
 	.panel {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: var(--space-md);
 	}
 
 	.hint {
@@ -412,13 +412,13 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 0.85rem;
+		gap: var(--space-sm);
 	}
 
 	label {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: var(--space-2xs);
 		font-weight: 600;
 		font-size: var(--text-sm);
 		color: var(--color-text);
@@ -432,7 +432,7 @@
 	input[type='text'],
 	input[type='search'] {
 		font-size: var(--text-base);
-		padding: 0.75rem 0.9rem;
+		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
 		background: var(--color-surface);
@@ -451,7 +451,7 @@
 		background: var(--color-accent);
 		color: #fff;
 		border: none;
-		padding: 0.85rem 1rem;
+		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-sm);
 		font-weight: 700;
 		font-size: var(--text-base);
@@ -474,7 +474,7 @@
 		color: var(--color-accent);
 		font-weight: 600;
 		cursor: pointer;
-		padding: 0.25rem 0;
+		padding: var(--space-2xs) 0;
 		align-self: center;
 	}
 
@@ -488,17 +488,17 @@
 	.results {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 	}
 
 	.result-card {
 		display: flex;
 		align-items: center;
-		gap: 0.85rem;
+		gap: var(--space-sm);
 		background: var(--color-surface);
 		border: none;
 		border-radius: var(--radius-md);
-		padding: 0.75rem;
+		padding: var(--space-sm);
 		box-shadow: 0 4px 12px var(--color-shadow);
 		cursor: pointer;
 		text-align: left;
@@ -515,7 +515,7 @@
 	.result-info {
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: var(--space-3xs);
 	}
 
 	.result-info .author {
@@ -539,10 +539,10 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 		background: var(--color-surface);
 		border-radius: var(--radius-lg);
-		padding: 1.5rem;
+		padding: var(--space-xl);
 		box-shadow: 0 10px 24px var(--color-shadow);
 		text-align: center;
 	}
@@ -567,7 +567,7 @@
 
 	.confirm-info .author {
 		color: var(--color-text-muted);
-		margin: 0.25rem 0 0;
+		margin: var(--space-2xs) 0 0;
 	}
 
 	.confirm-card form {

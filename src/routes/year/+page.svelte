@@ -159,7 +159,7 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 2rem;
+		gap: var(--space-2xl);
 		padding: 2rem 1.5rem calc(4rem + env(safe-area-inset-bottom));
 	}
 
@@ -169,8 +169,8 @@
 		flex-direction: column;
 		align-items: center;
 		text-align: center;
-		gap: 0.4rem;
-		padding: 1rem 0 0.5rem;
+		gap: var(--space-xs);
+		padding: var(--space-md) 0 var(--space-xs);
 	}
 
 	.avatar-circle {
@@ -183,7 +183,7 @@
 		background: var(--tile-color);
 		font-size: var(--text-2xl);
 		box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15);
-		margin-bottom: 0.5rem;
+		margin-bottom: var(--space-xs);
 	}
 
 	.hero-eyebrow {
@@ -220,14 +220,14 @@
 		color: var(--color-text-muted);
 		font-size: var(--text-base);
 		max-width: 46ch;
-		margin: 1rem auto;
+		margin: var(--space-md) auto;
 	}
 
 	.section-label {
 		font-family: var(--font-heading);
 		font-size: var(--text-md);
 		color: var(--color-wood-dark);
-		margin: 0 0 0.9rem;
+		margin: 0 0 var(--space-md);
 	}
 
 	/* ---- Title-page flourish ---- */
@@ -260,10 +260,10 @@
 		flex: 1 1 150px;
 		min-width: 150px;
 		background: var(--color-surface);
-		padding: 1.25rem 1.6rem;
+		padding: var(--space-lg) var(--space-xl);
 		display: flex;
 		flex-direction: column;
-		gap: 0.3rem;
+		gap: var(--space-2xs);
 		text-align: center;
 	}
 
@@ -285,10 +285,10 @@
 	.favourite-card {
 		display: flex;
 		align-items: center;
-		gap: 1.25rem;
+		gap: var(--space-lg);
 		background: var(--color-surface);
 		border-radius: var(--radius-lg);
-		padding: 1.25rem;
+		padding: var(--space-lg);
 		box-shadow: 0 8px 20px var(--color-shadow);
 		border-left: 6px solid var(--fav-accent);
 	}
@@ -317,7 +317,7 @@
 	}
 
 	.favourite-author {
-		margin: 0.35rem 0 0;
+		margin: var(--space-2xs) 0 0;
 		color: var(--color-text-muted);
 	}
 
@@ -325,7 +325,7 @@
 	.patch-row {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1.5rem 1rem;
+		gap: var(--space-xl) var(--space-md);
 	}
 
 	.patch-row :global(.patch) {
@@ -338,9 +338,9 @@
 		position: relative;
 		display: flex;
 		flex-direction: column;
-		gap: 2rem;
-		padding-left: 2.1rem;
-		padding-bottom: 1.6rem;
+		gap: var(--space-2xl);
+		padding-left: var(--space-2xl);
+		padding-bottom: var(--space-xl);
 	}
 
 	.timeline::before {
@@ -384,7 +384,7 @@
 	}
 
 	.month-name {
-		margin: 0 0 0.65rem;
+		margin: 0 0 var(--space-sm);
 		font-family: var(--font-heading);
 		font-size: var(--text-base);
 		font-weight: 600;
@@ -395,7 +395,7 @@
 	.month-books {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 1rem;
+		gap: var(--space-md);
 	}
 
 	.wall-book {
@@ -418,7 +418,7 @@
 		justify-content: center;
 		width: 100%;
 		height: 100%;
-		padding: 0.4rem;
+		padding: var(--space-xs);
 		background: var(--color-bg-alt);
 		border-radius: var(--radius-sm);
 		box-shadow: 0 5px 12px var(--color-shadow);

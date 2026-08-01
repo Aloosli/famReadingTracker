@@ -11,8 +11,8 @@
 	.title-banner {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.35rem;
-		padding: 0.3rem 1.1rem;
+		gap: var(--space-2xs);
+		padding: var(--space-2xs) var(--space-md);
 		background: var(--banner-color);
 		color: #fff;
 		font-weight: 700;

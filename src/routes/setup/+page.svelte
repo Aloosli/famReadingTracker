@@ -119,7 +119,7 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 1.75rem;
+		gap: var(--space-2xl);
 		padding: 2.5rem 1.5rem calc(4rem + env(safe-area-inset-bottom));
 	}
 
@@ -136,12 +136,12 @@
 		font-family: var(--font-heading);
 		font-size: clamp(1.9rem, 5vw, 2.6rem);
 		color: var(--color-wood-dark);
-		margin: 0.4rem 0 0;
+		margin: var(--space-xs) 0 0;
 		text-wrap: balance;
 	}
 
 	.subtitle {
-		margin: 0.75rem 0 0;
+		margin: var(--space-sm) 0 0;
 		color: var(--color-text-muted);
 		max-width: 52ch;
 	}
@@ -155,29 +155,29 @@
 	form {
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
+		gap: var(--space-lg);
 	}
 
 	.reader-list {
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
+		gap: var(--space-lg);
 	}
 
 	.reader-card {
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
+		gap: var(--space-lg);
 		background: var(--color-surface);
 		border-radius: var(--radius-lg);
-		padding: 1.5rem;
+		padding: var(--space-xl);
 		box-shadow: 0 6px 16px var(--color-shadow);
 	}
 
 	.reader-top {
 		display: flex;
 		align-items: flex-end;
-		gap: 1rem;
+		gap: var(--space-md);
 		flex-wrap: wrap;
 	}
 
@@ -186,14 +186,14 @@
 		min-width: 160px;
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: var(--space-xs);
 	}
 
 	.goal-field {
 		width: 7rem;
 		display: flex;
 		flex-direction: column;
-		gap: 0.4rem;
+		gap: var(--space-xs);
 	}
 
 	.field-label {
@@ -205,7 +205,7 @@
 	input[type='text'],
 	input[type='number'] {
 		font-size: var(--text-base);
-		padding: 0.7rem 0.85rem;
+		padding: var(--space-sm) var(--space-sm);
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
 		background: var(--color-bg);
@@ -237,7 +237,7 @@
 		color: var(--color-accent);
 		font-weight: 700;
 		font-size: var(--text-base);
-		padding: 0.75rem 1.25rem;
+		padding: var(--space-sm) var(--space-lg);
 		border-radius: var(--radius-md);
 		cursor: pointer;
 		transition: border-color 0.15s ease;
@@ -254,7 +254,7 @@
 		border: none;
 		font-weight: 700;
 		font-size: var(--text-md);
-		padding: 0.9rem 1.75rem;
+		padding: var(--space-md) var(--space-2xl);
 		border-radius: var(--radius-md);
 		box-shadow: 0 8px 18px var(--color-shadow);
 		cursor: pointer;

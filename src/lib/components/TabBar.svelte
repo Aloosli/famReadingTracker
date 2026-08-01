@@ -90,7 +90,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.1rem;
+		gap: var(--space-3xs);
 		padding: var(--space-xs) var(--space-2xs);
 		border-radius: var(--radius-sm);
 		text-decoration: none;

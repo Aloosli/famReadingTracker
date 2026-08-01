@@ -79,7 +79,7 @@
 		z-index: 200;
 		cursor: pointer;
 		animation: fade-in 0.15s ease;
-		padding: 1.5rem;
+		padding: var(--space-xl);
 	}
 
 	.celebration-card {
@@ -87,11 +87,11 @@
 		background: var(--color-surface);
 		border: 3px solid var(--accent);
 		border-radius: var(--radius-lg);
-		padding: 2.5rem 2rem;
+		padding: var(--space-3xl) var(--space-2xl);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 		max-width: 320px;
 		text-align: center;
 		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);

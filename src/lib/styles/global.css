@@ -48,17 +48,23 @@
 	--leading-normal: 1.6; /* running text */
 
 	/* ---- Spacing scale ----
-	   A 4px grid. Previously ~20 values between 0.15rem and 2.5rem with no relationship, so gaps
-	   that were meant to match were a pixel or two apart. Not yet applied everywhere — see the
-	   note in the sweep commit. */
+	   A 4px grid. Previously ~20 values between 0.15rem and 2.5rem with no relationship to each
+	   other, so gaps meant to match were a pixel or two apart — invisible individually, untidy in
+	   aggregate.
+
+	   The steps were chosen to fit what the app already does rather than imposed from outside: 20px
+	   and 40px earn their place because 1.25rem and 2.5rem were both in real use, and dropping them
+	   would have moved 24 declarations by a full 4px. Nothing here shifts by more than ~2px. */
 	--space-3xs: 0.125rem; /* 2px */
 	--space-2xs: 0.25rem; /* 4px */
 	--space-xs: 0.5rem; /* 8px */
 	--space-sm: 0.75rem; /* 12px */
 	--space-md: 1rem; /* 16px */
-	--space-lg: 1.5rem; /* 24px */
-	--space-xl: 2rem; /* 32px */
-	--space-2xl: 3rem; /* 48px */
+	--space-lg: 1.25rem; /* 20px */
+	--space-xl: 1.5rem; /* 24px */
+	--space-2xl: 2rem; /* 32px */
+	--space-3xl: 2.5rem; /* 40px */
+	--space-4xl: 3rem; /* 48px */
 
 	color-scheme: light;
 }

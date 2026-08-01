@@ -307,7 +307,7 @@
 	.goal-section {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 	}
 
 	.goal-card,
@@ -316,14 +316,14 @@
 		background: var(--color-surface);
 		border-radius: var(--radius-md);
 		box-shadow: 0 4px 12px var(--color-shadow);
-		padding: 1rem 1.1rem;
+		padding: var(--space-md) var(--space-md);
 	}
 
 	.goal-head {
 		display: flex;
 		align-items: center;
-		gap: 0.6rem;
-		margin-bottom: 0.75rem;
+		gap: var(--space-xs);
+		margin-bottom: var(--space-sm);
 	}
 
 	.goal-emoji {
@@ -346,7 +346,7 @@
 		color: var(--color-text-muted);
 		font-weight: 600;
 		font-size: var(--text-xs);
-		padding: 0.35rem 0.7rem;
+		padding: var(--space-2xs) var(--space-sm);
 		border-radius: 999px;
 		cursor: pointer;
 	}
@@ -383,27 +383,27 @@
 	}
 
 	.goal-remaining {
-		margin: 0.5rem 0 0;
+		margin: var(--space-xs) 0 0;
 		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
 	.goal-contribs {
 		list-style: none;
-		margin: 0.85rem 0 0;
+		margin: var(--space-sm) 0 0;
 		padding: 0;
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.5rem;
+		gap: var(--space-xs);
 	}
 
 	.goal-contrib {
 		display: flex;
 		align-items: center;
-		gap: 0.4rem;
+		gap: var(--space-xs);
 		background: var(--color-bg-alt);
 		border-radius: 999px;
-		padding: 0.25rem 0.7rem 0.25rem 0.3rem;
+		padding: var(--space-2xs) var(--space-sm) var(--space-2xs) var(--space-2xs);
 	}
 
 	.avatar-circle.small {
@@ -426,30 +426,30 @@
 
 	.goal-empty-hint,
 	.goal-form-lead {
-		margin: 0.85rem 0 0;
+		margin: var(--space-sm) 0 0;
 		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
 	.goal-form-lead {
-		margin: 0 0 0.75rem;
+		margin: 0 0 var(--space-sm);
 	}
 
 	.goal-form {
 		display: flex;
 		flex-direction: column;
-		gap: 0.7rem;
+		gap: var(--space-sm);
 	}
 
 	.goal-form-row {
 		display: flex;
-		gap: 0.6rem;
+		gap: var(--space-xs);
 	}
 
 	.goal-field {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		gap: var(--space-2xs);
 		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-text-muted);
@@ -457,7 +457,7 @@
 
 	.goal-field input {
 		font-size: var(--text-base);
-		padding: 0.5rem 0.65rem;
+		padding: var(--space-xs) var(--space-sm);
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
 		background: var(--color-bg);
@@ -480,7 +480,7 @@
 
 	.goal-form-actions {
 		display: flex;
-		gap: 0.6rem;
+		gap: var(--space-xs);
 		align-items: center;
 	}
 
@@ -490,7 +490,7 @@
 		border: none;
 		font-weight: 700;
 		font-size: var(--text-sm);
-		padding: 0.6rem 1.1rem;
+		padding: var(--space-xs) var(--space-md);
 		border-radius: var(--radius-sm);
 		cursor: pointer;
 	}
@@ -507,7 +507,7 @@
 	.goal-achieved {
 		display: flex;
 		align-items: center;
-		gap: 0.9rem;
+		gap: var(--space-md);
 		background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
 		color: #fff;
 	}
@@ -524,7 +524,7 @@
 	}
 
 	.goal-achieved-sub {
-		margin: 0.15rem 0 0;
+		margin: var(--space-3xs) 0 0;
 		font-size: var(--text-sm);
 		opacity: 0.95;
 	}
@@ -533,7 +533,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.4rem;
+		gap: var(--space-xs);
 	}
 
 	.goal-past-label {
@@ -548,7 +548,7 @@
 		font-size: var(--text-xs);
 		background: var(--color-bg-alt);
 		color: var(--color-text);
-		padding: 0.3rem 0.65rem;
+		padding: var(--space-2xs) var(--space-sm);
 		border-radius: 999px;
 	}
 
@@ -559,8 +559,8 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 2rem;
-		padding: 2.5rem 1.5rem;
+		gap: var(--space-2xl);
+		padding: var(--space-3xl) var(--space-xl);
 	}
 
 	header {
@@ -568,7 +568,7 @@
 		align-items: flex-start;
 		justify-content: space-between;
 		padding-right: calc(44px + 1rem + env(safe-area-inset-right));
-		gap: 1rem;
+		gap: var(--space-md);
 	}
 
 	h1 {
@@ -577,14 +577,14 @@
 	}
 
 	.subtitle {
-		margin: 0.25rem 0 0;
+		margin: var(--space-2xs) 0 0;
 		color: var(--color-text-muted);
 	}
 
 	section h2 {
 		font-size: var(--text-md);
 		color: var(--color-wood-dark);
-		margin-bottom: 0.75rem;
+		margin-bottom: var(--space-sm);
 	}
 
 	.empty-state {
@@ -595,14 +595,14 @@
 	.user-groups {
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
+		gap: var(--space-lg);
 	}
 
 	.user-group-header {
 		display: flex;
 		align-items: center;
-		gap: 0.6rem;
-		margin-bottom: 0.5rem;
+		gap: var(--space-xs);
+		margin-bottom: var(--space-xs);
 	}
 
 	.avatar-circle {
@@ -634,17 +634,17 @@
 		padding: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 	}
 
 	.book-item {
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.9rem;
+		gap: var(--space-md);
 		background-color: var(--color-surface);
 		border-radius: var(--radius-md);
-		padding: 0.75rem 1rem;
+		padding: var(--space-sm) var(--space-md);
 		box-shadow: 0 4px 12px var(--color-shadow);
 	}
 
@@ -656,7 +656,7 @@
 		font-weight: 700;
 		color: var(--color-text);
 		background: var(--color-surface);
-		padding: 0.15rem 0.55rem;
+		padding: var(--space-3xs) var(--space-xs);
 		border-radius: 999px;
 		box-shadow: 0 2px 6px var(--color-shadow);
 	}
@@ -682,7 +682,7 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.15rem;
+		gap: var(--space-3xs);
 	}
 
 	/* Deliberately a step below .user-name, not level with it: here the reader is the heading and
@@ -714,7 +714,7 @@
 		font-weight: 600;
 		color: var(--color-text);
 		background: var(--tile-color);
-		padding: 0.35rem 0.7rem;
+		padding: var(--space-2xs) var(--space-sm);
 		border-radius: 999px;
 		opacity: 0.85;
 	}

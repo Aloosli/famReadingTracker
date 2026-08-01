@@ -126,13 +126,13 @@
 		margin: 0 auto;
 		display: flex;
 		flex-direction: column;
-		gap: 1.75rem;
+		gap: var(--space-2xl);
 		padding: 2.5rem 1.5rem calc(4rem + env(safe-area-inset-bottom));
 	}
 
 	.back {
 		display: inline-block;
-		margin-bottom: 1.25rem;
+		margin-bottom: var(--space-lg);
 		color: var(--color-text-muted);
 		text-decoration: none;
 		font-weight: 600;
@@ -152,7 +152,7 @@
 	}
 
 	.subtitle {
-		margin: 0.75rem 0 0;
+		margin: var(--space-sm) 0 0;
 		color: var(--color-text-muted);
 		max-width: 54ch;
 		line-height: 1.5;
@@ -172,23 +172,23 @@
 	.cards {
 		display: flex;
 		flex-direction: column;
-		gap: 1.25rem;
+		gap: var(--space-lg);
 	}
 
 	.card {
 		display: flex;
 		flex-direction: column;
-		gap: 0.9rem;
+		gap: var(--space-md);
 		background: var(--color-surface);
 		border-radius: var(--radius-lg);
-		padding: 1.5rem;
+		padding: var(--space-xl);
 		box-shadow: 0 6px 16px var(--color-shadow);
 	}
 
 	.card-head {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 	}
 
 	.card-emoji {
@@ -213,18 +213,18 @@
 		background: var(--color-bg);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
-		padding: 0.1rem 0.35rem;
+		padding: 0.1rem var(--space-2xs);
 	}
 
 	.download {
 		align-self: flex-start;
-		margin-top: 0.25rem;
+		margin-top: var(--space-2xs);
 		background: none;
 		border: 1px solid var(--color-border);
 		color: var(--color-text);
 		font-weight: 700;
 		font-size: var(--text-base);
-		padding: 0.7rem 1.25rem;
+		padding: var(--space-sm) var(--space-lg);
 		border-radius: var(--radius-md);
 		text-decoration: none;
 		cursor: pointer;
@@ -255,12 +255,12 @@
 	}
 
 	.file-input::file-selector-button {
-		margin-right: 0.75rem;
+		margin-right: var(--space-sm);
 		background: none;
 		border: 1px solid var(--color-border);
 		color: var(--color-text);
 		font-weight: 600;
-		padding: 0.5rem 0.9rem;
+		padding: var(--space-xs) var(--space-md);
 		border-radius: var(--radius-sm);
 		cursor: pointer;
 	}
@@ -272,9 +272,9 @@
 	.restore-confirm {
 		display: flex;
 		flex-direction: column;
-		gap: 0.75rem;
-		margin-top: 1rem;
-		padding: 1rem;
+		gap: var(--space-sm);
+		margin-top: var(--space-md);
+		padding: var(--space-md);
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-md);
 		background: var(--color-bg);

@@ -38,14 +38,14 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.4rem;
+		gap: var(--space-xs);
 		padding: 2rem 1.5rem calc(2rem + env(safe-area-inset-bottom));
 		text-align: center;
 	}
 
 	.emoji {
 		font-size: var(--text-3xl);
-		margin-bottom: 0.5rem;
+		margin-bottom: var(--space-xs);
 	}
 
 	.status {
@@ -57,7 +57,7 @@
 	}
 
 	h1 {
-		margin: 0.25rem 0 0;
+		margin: var(--space-2xs) 0 0;
 		font-family: var(--font-heading, inherit);
 		font-size: clamp(1.6rem, 5vw, 2.2rem);
 		color: var(--color-wood-dark);
@@ -65,14 +65,14 @@
 	}
 
 	.blurb {
-		margin: 0.5rem 0 0;
+		margin: var(--space-xs) 0 0;
 		max-width: 42ch;
 		color: var(--color-text-muted);
 		line-height: 1.5;
 	}
 
 	.detail {
-		margin: 0.75rem 0 0;
+		margin: var(--space-sm) 0 0;
 		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		opacity: 0.75;
@@ -82,15 +82,15 @@
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 		justify-content: center;
-		margin-top: 1.75rem;
+		margin-top: var(--space-2xl);
 	}
 
 	.actions a {
 		text-decoration: none;
 		font-weight: 700;
-		padding: 0.8rem 1.4rem;
+		padding: var(--space-sm) var(--space-xl);
 		border-radius: var(--radius-md);
 	}
 

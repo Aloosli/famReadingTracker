@@ -140,7 +140,7 @@
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.25rem;
+		gap: var(--space-2xs);
 		padding: 2rem 1.5rem calc(2rem + env(safe-area-inset-bottom));
 		text-align: center;
 	}
@@ -151,7 +151,7 @@
 	}
 
 	.subtitle {
-		margin: 0 0 2.5rem;
+		margin: 0 0 var(--space-3xl);
 		color: var(--color-text-muted);
 		font-size: var(--text-md);
 	}
@@ -159,7 +159,7 @@
 	.error {
 		color: var(--color-error);
 		font-weight: 600;
-		margin-bottom: 1rem;
+		margin-bottom: var(--space-md);
 	}
 
 	.shelf {
@@ -174,9 +174,9 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 		width: 140px;
-		padding: 1.25rem 0.5rem;
+		padding: var(--space-lg) var(--space-xs);
 		background: var(--color-surface);
 		border: none;
 		border-radius: var(--radius-lg);
@@ -261,8 +261,8 @@
 	.manage-bar {
 		display: flex;
 		align-items: center;
-		gap: 1.25rem;
-		margin-top: 2.5rem;
+		gap: var(--space-lg);
+		margin-top: var(--space-3xl);
 		min-height: 1.5rem;
 	}
 
@@ -273,7 +273,7 @@
 		font-size: var(--text-base);
 		font-weight: 600;
 		color: var(--color-accent);
-		padding: 0.4rem 0.6rem;
+		padding: var(--space-xs) var(--space-xs);
 	}
 
 	.manage-toggle.subtle {
@@ -290,7 +290,7 @@
 		font-weight: 600;
 		color: var(--color-accent);
 		text-decoration: none;
-		padding: 0.4rem 0.6rem;
+		padding: var(--space-xs) var(--space-xs);
 	}
 
 	.confirm-backdrop {
@@ -299,7 +299,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 1.5rem;
+		padding: var(--space-xl);
 		background: rgba(0, 0, 0, 0.5);
 		z-index: 10;
 	}
@@ -310,8 +310,8 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 2rem 1.75rem 1.5rem;
+		gap: var(--space-xs);
+		padding: var(--space-2xl) var(--space-2xl) var(--space-xl);
 		background: var(--color-surface);
 		border-radius: var(--radius-lg);
 		box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
@@ -327,7 +327,7 @@
 		border-radius: 50%;
 		font-size: var(--text-2xl);
 		box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15);
-		margin-bottom: 0.25rem;
+		margin-bottom: var(--space-2xs);
 	}
 
 	.confirm-title {
@@ -338,7 +338,7 @@
 	}
 
 	.confirm-body {
-		margin: 0 0 0.75rem;
+		margin: 0 0 var(--space-sm);
 		color: var(--color-text-muted);
 		font-size: var(--text-base);
 		line-height: 1.5;
@@ -346,7 +346,7 @@
 
 	.confirm-actions {
 		display: flex;
-		gap: 0.75rem;
+		gap: var(--space-sm);
 		width: 100%;
 	}
 
@@ -357,7 +357,7 @@
 
 	.confirm-actions button {
 		flex: 1;
-		padding: 0.8rem 1rem;
+		padding: var(--space-sm) var(--space-md);
 		border-radius: var(--radius-md);
 		font-size: var(--text-base);
 		font-weight: 700;

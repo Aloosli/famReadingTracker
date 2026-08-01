@@ -52,7 +52,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 1.5rem;
+		padding: var(--space-xl);
 	}
 
 	.patch-backdrop {
@@ -71,7 +71,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 1rem;
+		gap: var(--space-md);
 		text-align: center;
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
@@ -112,12 +112,12 @@
 	}
 
 	.patch-close {
-		margin-top: 0.25rem;
+		margin-top: var(--space-2xs);
 		background: none;
 		border: none;
 		color: var(--color-text-muted);
 		font-size: var(--text-base);
-		padding: 0.4rem 0.8rem;
+		padding: var(--space-xs) var(--space-sm);
 		cursor: pointer;
 	}
 
