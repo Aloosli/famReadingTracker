@@ -1337,15 +1337,24 @@
 		gap: 0.35rem;
 	}
 
+	/* The streak and the month's count are the emotional payload of this page — they were sized one
+	   step above body text, so they read as data rather than as an achievement. Tabular figures keep
+	   the count-up animation from jittering as digits change width. */
 	.stat-value {
 		font-family: var(--font-heading);
-		font-size: var(--text-lg);
+		font-size: var(--text-2xl);
+		line-height: var(--leading-none);
 		color: var(--color-wood-dark);
 		font-weight: 700;
+		font-variant-numeric: tabular-nums;
 	}
 
+	/* Steps down and becomes a label rather than a second voice competing with the number. */
 	.stat-label {
-		font-size: var(--text-sm);
+		font-size: var(--text-2xs);
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 		color: var(--color-text-muted);
 	}
 
@@ -1813,7 +1822,11 @@
 		gap: 0.15rem;
 	}
 
+	/* The title is what you scan the shelf for, but it had no size of its own at all — it inherited
+	   body text and sat level with the author beneath it. */
 	.book-title {
+		font-size: var(--text-md);
+		line-height: var(--leading-snug);
 		font-weight: 600;
 		color: var(--color-text);
 		overflow: hidden;
@@ -1822,7 +1835,7 @@
 	}
 
 	.book-author {
-		font-size: var(--text-sm);
+		font-size: var(--text-xs);
 		color: var(--color-text-muted);
 	}
 

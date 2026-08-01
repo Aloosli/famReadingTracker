@@ -375,7 +375,9 @@
 		align-items: center;
 		justify-content: center;
 		font-weight: 700;
-		font-size: var(--text-sm);
+		/* The number the whole family is working toward — it was smaller than body text. */
+		font-size: var(--text-md);
+		font-variant-numeric: tabular-nums;
 		color: var(--color-text);
 		text-shadow: 0 1px 2px var(--color-surface);
 	}
@@ -419,6 +421,7 @@
 		font-size: var(--text-sm);
 		font-weight: 700;
 		color: var(--color-accent);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.goal-empty-hint,
@@ -615,7 +618,12 @@
 		box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.15);
 	}
 
+	/* Each reader heads their own group, so their name is the thing you scan for down this page —
+	   it had no size of its own and sat level with the book titles underneath it. */
 	.user-name {
+		font-size: var(--text-lg);
+		font-family: var(--font-heading);
+		line-height: var(--leading-snug);
 		font-weight: 600;
 		color: var(--color-text);
 	}
@@ -677,7 +685,11 @@
 		gap: 0.15rem;
 	}
 
+	/* Deliberately a step below .user-name, not level with it: here the reader is the heading and
+	   their books are the list. (On /home there is only one reader, so the title leads instead.) */
 	.book-title {
+		font-size: var(--text-base);
+		line-height: var(--leading-snug);
 		font-weight: 600;
 		color: var(--color-text);
 		overflow: hidden;
