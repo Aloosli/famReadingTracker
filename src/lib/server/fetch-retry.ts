@@ -2,7 +2,12 @@
 // moments apart. Retrying briefly keeps a transient blip from surfacing as "search is
 // unavailable" on a reader's screen.
 
-const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
+// 429 is deliberately absent. It looked retryable, but the 429 these lookups actually hit is
+// Google Books' *daily* quota being spent — which a 250ms wait cannot fix. Retrying it spent three
+// requests where one would do (making the exhaustion arrive sooner), and delayed the fallback to
+// the other source by the length of the retry ladder. Failing fast on 429 is strictly better now
+// that book-search.ts has somewhere else to ask.
+const RETRYABLE_STATUS = new Set([500, 502, 503, 504]);
 const DEFAULT_RETRY_DELAYS_MS = [250, 500];
 
 type FetchLike = (url: string | URL, init?: { signal?: AbortSignal }) => Promise<Response>;

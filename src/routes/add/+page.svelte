@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import BarcodeScanner from '$lib/components/BarcodeScanner.svelte';
-	import type { GoogleBookResult } from '$lib/types';
+	import type { BookSearchResult } from '$lib/types';
 	import type { ActionData, PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
@@ -30,7 +30,7 @@
 	type Tab = 'scan' | 'search' | 'manual';
 	let tab: Tab = $state('scan');
 
-	let selected: GoogleBookResult | null = $state(null);
+	let selected: BookSearchResult | null = $state(null);
 
 	// Scan tab state
 	let scannerActive = $state(true);
@@ -40,7 +40,7 @@
 	// Search tab state
 	let searchQuery = $state('');
 	let searchLoading = $state(false);
-	let searchResults: GoogleBookResult[] = $state([]);
+	let searchResults: BookSearchResult[] = $state([]);
 	let searchAttempted = $state(false);
 	let searchFailed = $state(false);
 
@@ -67,7 +67,7 @@
 		scannedIsbn = isbn;
 		try {
 			const res = await fetch(`/api/books/search?q=isbn:${encodeURIComponent(isbn)}`);
-			const body = (await res.json()) as { results: GoogleBookResult[] };
+			const body = (await res.json()) as { results: BookSearchResult[] };
 			if (body.results.length > 0) {
 				selected = body.results[0];
 				lookupState = 'idle';
@@ -94,7 +94,7 @@
 		searchFailed = false;
 		try {
 			const res = await fetch(`/api/books/search?q=${encodeURIComponent(searchQuery)}`);
-			const body = (await res.json()) as { results: GoogleBookResult[]; error?: string };
+			const body = (await res.json()) as { results: BookSearchResult[]; error?: string };
 			searchResults = body.results;
 			searchFailed = Boolean(body.error);
 		} catch {
@@ -158,13 +158,14 @@
 				<input type="hidden" name="title" value={selected.title} />
 				<input type="hidden" name="author" value={selected.author ?? ''} />
 				<input type="hidden" name="coverUrl" value={selected.coverUrl ?? ''} />
-				<input type="hidden" name="googleBooksId" value={selected.googleBooksId} />
+				<input type="hidden" name="sourceId" value={selected.sourceId} />
 				<input type="hidden" name="isbn" value={selected.isbn ?? ''} />
 				{#if selected.pageCount}
 					<input type="hidden" name="pageCount" value={selected.pageCount} />
 				{:else}
 					<label class="page-count-label">
-						How many pages? <span class="optional">(optional — powers the progress bar)</span>
+						How many pages?
+						<span class="optional">(optional — powers the progress bar, and counts toward the family goal)</span>
 						<input
 							type="number"
 							name="pageCount"
@@ -237,7 +238,7 @@
 				</p>
 			{:else if searchResults.length > 0}
 				<div class="results">
-					{#each searchResults as result (result.googleBooksId)}
+					{#each searchResults as result (result.sourceId)}
 						<button class="result-card" onclick={() => (selected = result)}>
 							{#if result.coverUrl}
 								<img src={result.coverUrl} alt={result.title} />

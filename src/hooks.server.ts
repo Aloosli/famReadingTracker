@@ -1,5 +1,10 @@
 import type { Handle } from '@sveltejs/kit';
 import { getDefaultHouseholdId } from '$lib/server/db/households';
+import { logStartupConfig } from '$lib/server/startup-checks';
+
+// Runs once when the server boots, so the container log says plainly whether optional-but-important
+// configuration actually arrived.
+logStartupConfig();
 
 export const handle: Handle = async ({ event, resolve }) => {
 	// Which family/tenant this request belongs to. Today there is a single household, so we resolve

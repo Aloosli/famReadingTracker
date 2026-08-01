@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { searchGoogleBooks } from '$lib/server/google-books';
+import { searchBooks } from '$lib/server/book-search';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -9,7 +9,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	}
 
 	try {
-		const results = await searchGoogleBooks(q);
+		const results = await searchBooks(q);
 		return json({ results });
 	} catch {
 		// Lookup failures should never block logging — the client falls back to manual entry.
