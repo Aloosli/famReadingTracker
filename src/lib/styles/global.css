@@ -137,7 +137,12 @@ body {
 	font-size: var(--text-base);
 	line-height: var(--leading-normal);
 	color: var(--color-text);
-	background: radial-gradient(circle at top left, var(--color-bg-alt), var(--color-bg) 60%);
+	/* The glow is painted once and the flat colour carries the rest of the page.
+	   Without `no-repeat` this tiles: body is pinned to 100% of the viewport (see the html, body
+	   rule above), so on any page taller than one screen the gradient repeated, and the second
+	   tile's bright top-left corner showed up mid-page as a hard-edged patch down the left side. */
+	background: radial-gradient(circle at top left, var(--color-bg-alt), var(--color-bg) 60%) no-repeat;
+	background-color: var(--color-bg);
 	-webkit-font-smoothing: antialiased;
 	-webkit-tap-highlight-color: transparent;
 	overscroll-behavior: none;
