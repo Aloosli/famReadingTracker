@@ -46,7 +46,9 @@ export const actions: Actions = {
 			title,
 			author: data.get('author')?.toString().trim() || null,
 			coverUrl: data.get('coverUrl')?.toString().trim() || null,
-			googleBooksId: data.get('googleBooksId')?.toString().trim() || null,
+			// The finding source's own id: a Google volume id, or an `ol:`-prefixed Open Library key.
+			// Stored in books.google_books_id, whose name predates the second source.
+			googleBooksId: data.get('sourceId')?.toString().trim() || null,
 			isbn: data.get('isbn')?.toString().trim() || null,
 			pageCount
 		});

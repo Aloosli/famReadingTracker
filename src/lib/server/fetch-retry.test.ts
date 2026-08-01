@@ -51,6 +51,15 @@ describe('fetchWithRetry', () => {
 		expect(script.calls()).toBe(1);
 	});
 
+	it('does not retry a 429, which is a spent daily quota rather than a blip', async () => {
+		// Retrying here spent three requests against an already-exhausted quota and delayed the
+		// fallback to the other lookup source. One attempt, then hand over.
+		const script = fetchScript(429);
+		const response = await fetchWithRetry('https://example.test', { ...NO_WAIT, ...script });
+		expect(response.status).toBe(429);
+		expect(script.calls()).toBe(1);
+	});
+
 	it('stops retrying once the signal is aborted', async () => {
 		const controller = new AbortController();
 		let call = 0;

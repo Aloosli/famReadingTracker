@@ -1,5 +1,5 @@
 import { env } from '$env/dynamic/private';
-import type { GoogleBookResult } from '$lib/types';
+import type { BookSearchResult } from '$lib/types';
 import { fetchWithRetry } from './fetch-retry';
 
 const GOOGLE_BOOKS_API = 'https://www.googleapis.com/books/v1/volumes';
@@ -17,7 +17,7 @@ interface VolumeItem {
 	volumeInfo?: VolumeInfo;
 }
 
-function mapVolumeToResult(item: VolumeItem): GoogleBookResult {
+function mapVolumeToResult(item: VolumeItem): BookSearchResult {
 	const info = item.volumeInfo ?? {};
 	const identifiers = info.industryIdentifiers ?? [];
 	const isbn =
@@ -27,7 +27,7 @@ function mapVolumeToResult(item: VolumeItem): GoogleBookResult {
 	const rawCover = info.imageLinks?.thumbnail ?? info.imageLinks?.smallThumbnail ?? null;
 
 	return {
-		googleBooksId: item.id,
+		sourceId: item.id,
 		title: info.title ?? 'Untitled',
 		author: info.authors?.join(', ') ?? null,
 		coverUrl: rawCover ? rawCover.replace(/^http:/, 'https:') : null,
@@ -36,7 +36,7 @@ function mapVolumeToResult(item: VolumeItem): GoogleBookResult {
 	};
 }
 
-export async function searchGoogleBooks(query: string): Promise<GoogleBookResult[]> {
+export async function searchGoogleBooks(query: string): Promise<BookSearchResult[]> {
 	const url = new URL(GOOGLE_BOOKS_API);
 	url.searchParams.set('q', query);
 	url.searchParams.set('maxResults', '12');

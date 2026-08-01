@@ -124,6 +124,23 @@ CREATE TABLE IF NOT EXISTS family_goals (
 
 CREATE INDEX IF NOT EXISTS idx_family_goals_household ON family_goals(household_id);
 
+-- Answers from the book lookup APIs, keyed by the normalised search text. Not family data: book
+-- metadata is the same for everyone, so this is deliberately NOT scoped to a household and is NOT
+-- part of a backup — it's a disposable speed-and-quota layer that rebuilds itself.
+--
+-- It exists because every household shares one Google Books API key, and that key has a daily
+-- request ceiling. Families search for the same handful of titles, so caching turns what would be
+-- N families' worth of requests into one, and keeps search working when the API is down.
+CREATE TABLE IF NOT EXISTS book_lookup_cache (
+	query_key TEXT PRIMARY KEY,
+	results_json TEXT NOT NULL,
+	-- Which source actually answered, for debugging a bad cached result.
+	source TEXT NOT NULL,
+	fetched_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_book_lookup_cache_fetched ON book_lookup_cache(fetched_at);
+
 CREATE TABLE IF NOT EXISTS titles (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	key TEXT NOT NULL UNIQUE,
