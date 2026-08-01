@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { getUserById } from '$lib/server/db/users';
+import { getAllUsers, getUserById } from '$lib/server/db/users';
 import { getFamilyCurrentlyReading, getFamilyRecentlyFinished } from '$lib/server/db/entries';
 import { getDisplayTitlesForAllUsers } from '$lib/server/db/titles';
 import {
@@ -38,6 +38,9 @@ export const load: PageServerLoad = ({ cookies, locals }) => {
 
 	return {
 		user,
+		// Everyone in the household, for the hero's avatar cluster — the page is about these people,
+		// so it should open with them rather than with a heading that could belong to any family.
+		readers: getAllUsers(locals.householdId),
 		currentlyReading: getFamilyCurrentlyReading(locals.householdId),
 		recentlyFinished: getFamilyRecentlyFinished(locals.householdId),
 		displayTitles: getDisplayTitlesForAllUsers(),

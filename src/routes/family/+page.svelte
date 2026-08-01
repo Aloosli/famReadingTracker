@@ -75,11 +75,25 @@
 </svelte:head>
 
 <main>
-	<header>
-		<div>
-			<h1>Family shelf</h1>
-			<p class="subtitle">What everyone's reading right now.</p>
-		</div>
+	<header class="hero">
+		{#if data.readers.length > 0}
+			<div class="reader-cluster" aria-hidden="true">
+				{#each data.readers as reader, i (reader.id)}
+					<!-- Reuses the app's existing staggered entrance, so the family assembles on arrival
+					     rather than appearing all at once. Opt-in on prefers-reduced-motion. -->
+					<span
+						class="cluster-avatar rise-in"
+						style:--tile-color={reader.avatar_color}
+						style:--i={i}
+					>
+						{reader.avatar_emoji}
+					</span>
+				{/each}
+			</div>
+		{/if}
+		<h1>Family shelf</h1>
+		<p class="subtitle">What everyone's reading right now.</p>
+		<p class="asterism" aria-hidden="true">⁂</p>
 	</header>
 
 	<section class="goal-section">
@@ -563,22 +577,64 @@
 		padding: var(--space-3xl) var(--space-xl);
 	}
 
-	header {
+	/* The page title was 22px against 18px section headings, in the same face and colour — so it read
+	   as the first of four equal headings rather than as the name of the page. It now opens the way
+	   /year does: a centred hero, with the family themselves as the first thing you see. Body content
+	   below stays left-aligned; centred lists are hard to scan. */
+	.hero {
 		display: flex;
-		align-items: flex-start;
-		justify-content: space-between;
-		padding-right: calc(44px + 1rem + env(safe-area-inset-right));
-		gap: var(--space-md);
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: var(--space-2xs);
+		/* Clears the floating theme/sound controls in the top-right. */
+		padding: var(--space-xs) calc(44px + var(--space-md) + env(safe-area-inset-right, 0px)) 0;
+	}
+
+	/* Overlapping circles, so four readers read as one family rather than four separate badges. */
+	.reader-cluster {
+		display: flex;
+		margin-bottom: var(--space-xs);
+	}
+
+	.cluster-avatar {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		background: var(--tile-color);
+		font-size: var(--text-lg);
+		line-height: var(--leading-none);
+		/* The ring is the page background, so the circles read as cut out of it rather than stacked. */
+		box-shadow:
+			0 0 0 3px var(--color-bg),
+			inset 0 -3px 6px rgba(0, 0, 0, 0.15);
+	}
+
+	.cluster-avatar:not(:first-child) {
+		margin-left: -0.75rem;
 	}
 
 	h1 {
-		font-size: var(--text-lg);
+		font-size: clamp(2.25rem, 7vw, 3.25rem);
+		line-height: var(--leading-tight);
 		color: var(--color-wood-dark);
 	}
 
 	.subtitle {
-		margin: var(--space-2xs) 0 0;
+		margin: 0;
 		color: var(--color-text-muted);
+		font-size: var(--text-md);
+	}
+
+	/* Same title-page flourish the yearbook uses, closing the hero off from the sections below. */
+	.asterism {
+		margin: var(--space-xs) 0 0;
+		font-size: var(--text-lg);
+		color: var(--color-text-muted);
+		user-select: none;
 	}
 
 	section h2 {
