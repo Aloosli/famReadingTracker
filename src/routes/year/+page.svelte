@@ -168,7 +168,7 @@
 	.back-link {
 		align-self: flex-start;
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		text-decoration: none;
 		color: var(--color-accent);
 	}
@@ -195,14 +195,14 @@
 		height: 76px;
 		border-radius: 50%;
 		background: var(--tile-color);
-		font-size: 2.1rem;
+		font-size: var(--text-2xl);
 		box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15);
 		margin-bottom: 0.5rem;
 	}
 
 	.hero-eyebrow {
 		margin: 0;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
@@ -220,7 +220,7 @@
 
 	.lede {
 		text-align: center;
-		font-size: 1.15rem;
+		font-size: var(--text-md);
 		color: var(--color-text);
 		margin: -0.5rem 0 0;
 	}
@@ -232,14 +232,14 @@
 	.empty-state {
 		text-align: center;
 		color: var(--color-text-muted);
-		font-size: 1rem;
+		font-size: var(--text-base);
 		max-width: 46ch;
 		margin: 1rem auto;
 	}
 
 	.section-label {
 		font-family: var(--font-heading);
-		font-size: 1.1rem;
+		font-size: var(--text-md);
 		color: var(--color-wood-dark);
 		margin: 0 0 0.9rem;
 	}
@@ -248,7 +248,7 @@
 	.asterism {
 		text-align: center;
 		margin: -0.9rem 0 -0.5rem;
-		font-size: 1.5rem;
+		font-size: var(--text-lg);
 		color: var(--color-text-muted);
 		user-select: none;
 	}
@@ -283,7 +283,7 @@
 
 	.stat-number {
 		font-family: var(--font-heading);
-		font-size: 1.7rem;
+		font-size: var(--text-xl);
 		font-weight: 700;
 		color: var(--color-wood-dark);
 		font-variant-numeric: tabular-nums;
@@ -291,7 +291,7 @@
 	}
 
 	.stat-caption {
-		font-size: 0.82rem;
+		font-size: var(--text-xs);
 		color: var(--color-text-muted);
 	}
 
@@ -321,11 +321,11 @@
 		align-items: center;
 		justify-content: center;
 		background: var(--color-bg-alt);
-		font-size: 2.5rem;
+		font-size: var(--text-2xl);
 	}
 
 	.favourite-info h2 {
-		font-size: 1.4rem;
+		font-size: var(--text-lg);
 		color: var(--color-wood-dark);
 		margin: 0;
 	}
@@ -400,7 +400,7 @@
 	.month-name {
 		margin: 0 0 0.65rem;
 		font-family: var(--font-heading);
-		font-size: 1rem;
+		font-size: var(--text-base);
 		font-weight: 600;
 		letter-spacing: 0.06em;
 		color: var(--color-wood-dark);
@@ -436,7 +436,7 @@
 		background: var(--color-bg-alt);
 		border-radius: var(--radius-sm);
 		box-shadow: 0 5px 12px var(--color-shadow);
-		font-size: 0.72rem;
+		font-size: var(--text-2xs);
 		font-weight: 600;
 		text-align: center;
 		color: var(--color-text-muted);
@@ -448,7 +448,7 @@
 		position: absolute;
 		top: -7px;
 		right: -7px;
-		font-size: 1rem;
+		font-size: var(--text-base);
 		background: var(--color-surface);
 		border-radius: 50%;
 		width: 26px;

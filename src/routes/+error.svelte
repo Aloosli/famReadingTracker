@@ -44,7 +44,7 @@
 	}
 
 	.emoji {
-		font-size: 3rem;
+		font-size: var(--text-3xl);
 		margin-bottom: 0.5rem;
 	}
 
@@ -53,7 +53,7 @@
 		font-weight: 700;
 		letter-spacing: 0.12em;
 		color: var(--color-accent);
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 	}
 
 	h1 {
@@ -73,7 +73,7 @@
 
 	.detail {
 		margin: 0.75rem 0 0;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		opacity: 0.75;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;

@@ -95,14 +95,14 @@
 	.patch-desc {
 		margin: 0;
 		color: var(--color-text);
-		font-size: 1.05rem;
+		font-size: var(--text-md);
 		line-height: 1.5;
 	}
 
 	.patch-earned {
 		margin: -0.4rem 0 0;
 		color: var(--color-text-muted);
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 	}
 
 	.patch-actions {
@@ -116,7 +116,7 @@
 		background: none;
 		border: none;
 		color: var(--color-text-muted);
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		padding: 0.4rem 0.8rem;
 		cursor: pointer;
 	}

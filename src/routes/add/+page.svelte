@@ -307,7 +307,7 @@
 	}
 
 	h1 {
-		font-size: 1.5rem;
+		font-size: var(--text-lg);
 		color: var(--color-wood-dark);
 	}
 
@@ -328,7 +328,7 @@
 
 	.shelves legend {
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		padding: 0;
 		margin-bottom: 0.4rem;
@@ -348,7 +348,7 @@
 		padding: 0.65rem 0.5rem;
 		border-radius: var(--radius-sm);
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		cursor: pointer;
 	}
@@ -387,7 +387,7 @@
 		padding: 0.65rem 0.5rem;
 		border-radius: var(--radius-sm);
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		cursor: pointer;
 	}
@@ -420,7 +420,7 @@
 		flex-direction: column;
 		gap: 0.35rem;
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		color: var(--color-text);
 	}
 
@@ -431,7 +431,7 @@
 
 	input[type='text'],
 	input[type='search'] {
-		font-size: 1rem;
+		font-size: var(--text-base);
 		padding: 0.75rem 0.9rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -454,7 +454,7 @@
 		padding: 0.85rem 1rem;
 		border-radius: var(--radius-sm);
 		font-weight: 700;
-		font-size: 1rem;
+		font-size: var(--text-base);
 		cursor: pointer;
 		transition: background 0.15s ease;
 	}
@@ -519,7 +519,7 @@
 	}
 
 	.result-info .author {
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
@@ -531,7 +531,7 @@
 		justify-content: center;
 		background: var(--color-bg-alt);
 		border-radius: 4px;
-		font-size: 1.5rem;
+		font-size: var(--text-lg);
 		flex-shrink: 0;
 	}
 
@@ -557,12 +557,12 @@
 	.confirm-card .cover-placeholder {
 		width: 100px;
 		height: 150px;
-		font-size: 2.5rem;
+		font-size: var(--text-2xl);
 		border-radius: var(--radius-sm);
 	}
 
 	.confirm-info h2 {
-		font-size: 1.3rem;
+		font-size: var(--text-lg);
 	}
 
 	.confirm-info .author {

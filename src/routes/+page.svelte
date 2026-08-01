@@ -153,7 +153,7 @@
 	.subtitle {
 		margin: 0 0 2.5rem;
 		color: var(--color-text-muted);
-		font-size: 1.05rem;
+		font-size: var(--text-md);
 	}
 
 	.error {
@@ -205,13 +205,13 @@
 		height: 84px;
 		border-radius: 50%;
 		background: var(--tile-color);
-		font-size: 2.5rem;
+		font-size: var(--text-2xl);
 		box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15);
 	}
 
 	.name {
 		font-weight: 600;
-		font-size: 1.05rem;
+		font-size: var(--text-md);
 		color: var(--color-text);
 	}
 
@@ -251,7 +251,7 @@
 		border: 2px solid var(--color-surface);
 		background: var(--color-error);
 		color: #fff;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		line-height: 1;
 		cursor: pointer;
 		box-shadow: 0 4px 10px var(--color-shadow);
@@ -270,7 +270,7 @@
 		background: none;
 		border: none;
 		cursor: pointer;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		font-weight: 600;
 		color: var(--color-accent);
 		padding: 0.4rem 0.6rem;
@@ -286,7 +286,7 @@
 	}
 
 	.add-link {
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		font-weight: 600;
 		color: var(--color-accent);
 		text-decoration: none;
@@ -325,7 +325,7 @@
 		width: 64px;
 		height: 64px;
 		border-radius: 50%;
-		font-size: 2rem;
+		font-size: var(--text-2xl);
 		box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15);
 		margin-bottom: 0.25rem;
 	}
@@ -333,14 +333,14 @@
 	.confirm-title {
 		margin: 0;
 		font-family: var(--font-heading, inherit);
-		font-size: 1.35rem;
+		font-size: var(--text-lg);
 		color: var(--color-wood-dark);
 	}
 
 	.confirm-body {
 		margin: 0 0 0.75rem;
 		color: var(--color-text-muted);
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		line-height: 1.5;
 	}
 
@@ -359,7 +359,7 @@
 		flex: 1;
 		padding: 0.8rem 1rem;
 		border-radius: var(--radius-md);
-		font-size: 1rem;
+		font-size: var(--text-base);
 		font-weight: 700;
 		cursor: pointer;
 	}

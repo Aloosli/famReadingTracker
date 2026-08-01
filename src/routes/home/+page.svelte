@@ -1016,12 +1016,12 @@
 		height: 100px;
 		border-radius: 50%;
 		background: var(--tile-color);
-		font-size: 2.75rem;
+		font-size: var(--text-3xl);
 		box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15);
 	}
 
 	h1 {
-		font-size: 1.6rem;
+		font-size: var(--text-xl);
 		color: var(--color-wood-dark);
 		margin: 0;
 	}
@@ -1031,7 +1031,7 @@
 		border: none;
 		color: var(--color-accent);
 		font-weight: 600;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		cursor: pointer;
 		padding: 0.15rem 0.5rem;
 	}
@@ -1052,7 +1052,7 @@
 
 	.profile-editor h2 {
 		font-family: var(--font-heading);
-		font-size: 1.2rem;
+		font-size: var(--text-md);
 		color: var(--color-wood-dark);
 		margin: 0 0 1rem;
 	}
@@ -1064,7 +1064,7 @@
 	}
 
 	.field-label {
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		color: var(--color-text-muted);
 	}
@@ -1082,7 +1082,7 @@
 
 	.profile-editor input[type='text'],
 	.profile-editor input[type='number'] {
-		font-size: 1rem;
+		font-size: var(--text-base);
 		padding: 0.7rem 0.85rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -1101,7 +1101,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		padding: 0.6rem 1.2rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1121,7 +1121,7 @@
 		border: 1px solid var(--color-border);
 		color: var(--color-text-muted);
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		padding: 0.6rem 1rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1136,7 +1136,7 @@
 		background: none;
 		border: none;
 		color: var(--color-accent);
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		font-weight: 600;
 		cursor: pointer;
 		padding: 0.5rem 0;
@@ -1183,7 +1183,7 @@
 	}
 
 	.fgs-emoji {
-		font-size: 1.5rem;
+		font-size: var(--text-lg);
 		line-height: 1;
 		flex-shrink: 0;
 	}
@@ -1211,7 +1211,7 @@
 
 	.fgs-nums {
 		flex-shrink: 0;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-text-muted);
 	}
@@ -1234,7 +1234,7 @@
 
 	.fgs-today {
 		margin: 0.4rem 0 0;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		color: var(--color-text-muted);
 	}
 
@@ -1253,7 +1253,7 @@
 
 	.family-link {
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		text-decoration: none;
 	}
 
@@ -1270,7 +1270,7 @@
 	}
 
 	.streak-flame {
-		font-size: 2.1rem;
+		font-size: var(--text-2xl);
 		line-height: 1;
 	}
 
@@ -1299,7 +1299,7 @@
 	}
 
 	.freeze-slot {
-		font-size: 1rem;
+		font-size: var(--text-base);
 		line-height: 1;
 		opacity: 0.3;
 		filter: grayscale(1);
@@ -1311,14 +1311,14 @@
 	}
 
 	.freeze-label {
-		font-size: 0.68rem;
+		font-size: var(--text-2xs);
 		font-weight: 600;
 		color: var(--color-text-muted);
 	}
 
 	.freeze-note {
 		margin: 0;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		font-weight: 600;
 		color: var(--color-text);
 		background: var(--color-bg-alt);
@@ -1345,13 +1345,13 @@
 
 	.stat-value {
 		font-family: var(--font-heading);
-		font-size: 1.4rem;
+		font-size: var(--text-lg);
 		color: var(--color-wood-dark);
 		font-weight: 700;
 	}
 
 	.stat-label {
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
@@ -1379,7 +1379,7 @@
 		border: none;
 		color: var(--color-accent);
 		font-weight: 600;
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		cursor: pointer;
 		padding: 0;
 	}
@@ -1397,7 +1397,7 @@
 
 	.goal-edit-form input[type='number'] {
 		width: 3.5rem;
-		font-size: 1.1rem;
+		font-size: var(--text-md);
 		font-weight: 700;
 		padding: 0.25rem 0.4rem;
 		border-radius: var(--radius-sm);
@@ -1411,7 +1411,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		padding: 0.35rem 0.65rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1441,7 +1441,7 @@
 	.upnext-section h2,
 	.setaside-section h2,
 	.bookshelf-section h2 {
-		font-size: 1.15rem;
+		font-size: var(--text-md);
 		color: var(--color-wood-dark);
 		margin-bottom: 0.75rem;
 	}
@@ -1472,7 +1472,7 @@
 
 	.upnext-count {
 		font-family: var(--font-body);
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		color: #fff;
 		background: var(--color-accent);
@@ -1483,7 +1483,7 @@
 
 	.upnext-add {
 		margin-left: auto;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		font-weight: 700;
 		color: var(--color-accent);
 		text-decoration: none;
@@ -1526,7 +1526,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.55rem 0.9rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1539,7 +1539,7 @@
 
 	.shelf-count {
 		font-family: var(--font-body);
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		color: #fff;
 		background: var(--color-accent);
@@ -1613,7 +1613,7 @@
 	}
 
 	.unfinish-text {
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		color: var(--color-text);
 	}
 
@@ -1629,7 +1629,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.55rem 0.9rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1645,7 +1645,7 @@
 		border: 1px solid var(--color-border);
 		color: var(--color-text-muted);
 		font-weight: 600;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.55rem 0.75rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1667,7 +1667,7 @@
 		background: var(--color-bg-alt);
 		border-radius: 4px 4px 2px 2px;
 		box-shadow: 0 5px 10px var(--color-shadow);
-		font-size: 0.6rem;
+		font-size: var(--text-2xs);
 		font-weight: 600;
 		text-align: center;
 		color: var(--color-text-muted);
@@ -1676,7 +1676,7 @@
 	}
 
 	.ph-emoji {
-		font-size: 1.3rem;
+		font-size: var(--text-lg);
 	}
 
 	.trophy-section {
@@ -1692,7 +1692,7 @@
 
 	.trophy-count {
 		font-family: var(--font-body);
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		color: #fff;
 		background: var(--color-accent);
@@ -1736,7 +1736,7 @@
 		border: none;
 		border-radius: 999px;
 		padding: 0.6rem 1.3rem;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		font-weight: 600;
 		color: #fff;
 		background: var(--color-accent);
@@ -1750,7 +1750,7 @@
 
 	.empty-state {
 		color: var(--color-text-muted);
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 	}
 
 	.book-list {
@@ -1784,7 +1784,7 @@
 		position: absolute;
 		top: 0.6rem;
 		right: 0.75rem;
-		font-size: 0.72rem;
+		font-size: var(--text-2xs);
 		font-weight: 700;
 		color: var(--color-text);
 		background: var(--color-surface);
@@ -1806,7 +1806,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.4rem;
+		font-size: var(--text-lg);
 	}
 
 	.book-info {
@@ -1828,7 +1828,7 @@
 	}
 
 	.book-author {
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
@@ -1844,7 +1844,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.55rem 0.9rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1860,7 +1860,7 @@
 		border: 1px solid var(--color-border);
 		color: var(--color-text-muted);
 		font-weight: 600;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.55rem 0.75rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1879,7 +1879,7 @@
 		border: 1px solid var(--color-border);
 		color: var(--color-text-muted);
 		font-weight: 600;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.55rem 0.75rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -1915,7 +1915,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.5rem 0.9rem;
 		border-radius: 999px;
 		cursor: pointer;
@@ -1938,7 +1938,7 @@
 		align-items: center;
 		gap: 0.3rem;
 		font-weight: 700;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-accent);
 		padding: 0.5rem 0;
 	}
@@ -1948,7 +1948,7 @@
 		border: none;
 		color: var(--color-text-muted);
 		font-weight: 600;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		cursor: pointer;
 		padding: 0;
 	}
@@ -1969,7 +1969,7 @@
 	.log-progress-form input[type='number'],
 	.page-count-form input[type='number'] {
 		width: 6rem;
-		font-size: 1rem;
+		font-size: var(--text-base);
 		padding: 0.5rem 0.65rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -1981,7 +1981,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-text-muted);
 	}
@@ -1999,7 +1999,7 @@
 		padding: 0.5rem 0.7rem;
 		border-radius: var(--radius-sm);
 		font-weight: 600;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		cursor: pointer;
 	}
@@ -2021,7 +2021,7 @@
 	}
 
 	.log-when-label {
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-text-muted);
 	}
@@ -2043,7 +2043,7 @@
 		padding: 0.4rem 0.65rem;
 		border-radius: var(--radius-sm);
 		font-weight: 600;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		color: var(--color-text-muted);
 		cursor: pointer;
 	}
@@ -2056,7 +2056,7 @@
 	}
 
 	.log-when-earlier input[type='date'] {
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		padding: 0.45rem 0.6rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -2070,7 +2070,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.55rem 0.9rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -2092,7 +2092,7 @@
 		border: none;
 		background: transparent;
 		padding: 0.2rem 0;
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-text-muted);
 		cursor: pointer;
@@ -2114,7 +2114,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		flex-wrap: wrap;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		padding: 0.35rem 0.5rem;
 		border-radius: var(--radius-sm);
 		background: var(--color-bg-alt);
@@ -2136,7 +2136,7 @@
 		border: 1px solid var(--color-border);
 		background: var(--color-surface);
 		color: var(--color-text-muted);
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		padding: 0.3rem 0.6rem;
 		border-radius: var(--radius-sm);
@@ -2158,7 +2158,7 @@
 
 	.log-history-edit input[type='number'] {
 		width: 5rem;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		padding: 0.4rem 0.5rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -2167,7 +2167,7 @@
 	}
 
 	.log-history-edit input[type='date'] {
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		padding: 0.35rem 0.5rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -2180,7 +2180,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		padding: 0.4rem 0.8rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -2188,7 +2188,7 @@
 
 	.log-history-hint {
 		margin: 0.5rem 0 0;
-		font-size: 0.7rem;
+		font-size: var(--text-2xs);
 		color: var(--color-text-muted);
 	}
 
@@ -2218,13 +2218,13 @@
 	}
 
 	.reaction-tick {
-		font-size: 2.4rem;
+		font-size: var(--text-2xl);
 	}
 
 	.reaction-q {
 		margin: 0.5rem 0 1.25rem;
 		font-family: var(--font-heading);
-		font-size: 1.15rem;
+		font-size: var(--text-md);
 		color: var(--color-wood-dark);
 	}
 
@@ -2258,11 +2258,11 @@
 	}
 
 	.reaction-option-emoji {
-		font-size: 1.9rem;
+		font-size: var(--text-xl);
 	}
 
 	.reaction-option-label {
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		color: var(--color-text);
 	}
@@ -2273,7 +2273,7 @@
 		border: none;
 		color: var(--color-text-muted);
 		font-weight: 600;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		cursor: pointer;
 		padding: 0.35rem 0.5rem;
 	}
@@ -2308,7 +2308,7 @@
 		position: absolute;
 		top: -6px;
 		right: -6px;
-		font-size: 1rem;
+		font-size: var(--text-base);
 		background: var(--color-surface);
 		border-radius: 50%;
 		width: 24px;
@@ -2331,7 +2331,7 @@
 	}
 
 	.reaction-picker-label {
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		margin-right: 0.15rem;
 	}
@@ -2342,7 +2342,7 @@
 		border-radius: 999px;
 		width: 38px;
 		height: 38px;
-		font-size: 1.15rem;
+		font-size: var(--text-md);
 		cursor: pointer;
 		display: flex;
 		align-items: center;

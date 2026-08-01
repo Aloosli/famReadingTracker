@@ -90,7 +90,7 @@
 	}
 
 	.emoji {
-		font-size: 1.15rem;
+		font-size: var(--text-md);
 		line-height: 1;
 	}
 

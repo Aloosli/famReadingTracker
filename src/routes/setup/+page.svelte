@@ -125,7 +125,7 @@
 
 	.eyebrow {
 		margin: 0;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		letter-spacing: 0.14em;
 		text-transform: uppercase;
@@ -197,14 +197,14 @@
 	}
 
 	.field-label {
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		color: var(--color-text-muted);
 	}
 
 	input[type='text'],
 	input[type='number'] {
-		font-size: 1rem;
+		font-size: var(--text-base);
 		padding: 0.7rem 0.85rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -222,7 +222,7 @@
 		height: 44px;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
-		font-size: 1rem;
+		font-size: var(--text-base);
 	}
 
 	.remove-reader:hover {
@@ -236,7 +236,7 @@
 		border: 2px dashed var(--color-border);
 		color: var(--color-accent);
 		font-weight: 700;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		padding: 0.75rem 1.25rem;
 		border-radius: var(--radius-md);
 		cursor: pointer;
@@ -253,7 +253,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 1.05rem;
+		font-size: var(--text-md);
 		padding: 0.9rem 1.75rem;
 		border-radius: var(--radius-md);
 		box-shadow: 0 8px 18px var(--color-shadow);

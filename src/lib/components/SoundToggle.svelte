@@ -37,7 +37,7 @@
 		border: none;
 		background: var(--color-surface);
 		box-shadow: 0 4px 12px var(--color-shadow);
-		font-size: 1.2rem;
+		font-size: var(--text-md);
 		display: flex;
 		align-items: center;
 		justify-content: center;

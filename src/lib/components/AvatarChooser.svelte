@@ -67,7 +67,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 2rem;
+		font-size: var(--text-2xl);
 		box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.15);
 	}
 
@@ -86,7 +86,7 @@
 	}
 
 	.field-label {
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		color: var(--color-text-muted);
 	}
@@ -102,7 +102,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.3rem;
+		font-size: var(--text-lg);
 		background: var(--color-bg-alt);
 		border: 2px solid transparent;
 		border-radius: var(--radius-sm);

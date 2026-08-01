@@ -328,13 +328,13 @@
 	}
 
 	.goal-emoji {
-		font-size: 1.6rem;
+		font-size: var(--text-xl);
 		line-height: 1;
 	}
 
 	.goal-title {
 		font-weight: 700;
-		font-size: 1.1rem;
+		font-size: var(--text-md);
 		color: var(--color-text);
 		flex: 1;
 		min-width: 0;
@@ -346,7 +346,7 @@
 		background: var(--color-bg-alt);
 		color: var(--color-text-muted);
 		font-weight: 600;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		padding: 0.35rem 0.7rem;
 		border-radius: 999px;
 		cursor: pointer;
@@ -376,14 +376,14 @@
 		align-items: center;
 		justify-content: center;
 		font-weight: 700;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text);
 		text-shadow: 0 1px 2px var(--color-surface);
 	}
 
 	.goal-remaining {
 		margin: 0.5rem 0 0;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
@@ -408,16 +408,16 @@
 	.avatar-circle.small {
 		width: 26px;
 		height: 26px;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 	}
 
 	.goal-contrib-name {
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text);
 	}
 
 	.goal-contrib-pages {
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		font-weight: 700;
 		color: var(--color-accent);
 	}
@@ -425,7 +425,7 @@
 	.goal-empty-hint,
 	.goal-form-lead {
 		margin: 0.85rem 0 0;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
@@ -448,13 +448,13 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-text-muted);
 	}
 
 	.goal-field input {
-		font-size: 1rem;
+		font-size: var(--text-base);
 		padding: 0.5rem 0.65rem;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--color-border);
@@ -469,7 +469,7 @@
 
 	.emoji-field input {
 		text-align: center;
-		font-size: 1.3rem;
+		font-size: var(--text-lg);
 	}
 
 	.title-field {
@@ -487,7 +487,7 @@
 		color: #fff;
 		border: none;
 		font-weight: 700;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		padding: 0.6rem 1.1rem;
 		border-radius: var(--radius-sm);
 		cursor: pointer;
@@ -497,7 +497,7 @@
 		background: none;
 		border: none;
 		color: var(--color-text-muted);
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		cursor: pointer;
 		text-decoration: underline;
 	}
@@ -511,19 +511,19 @@
 	}
 
 	.goal-achieved-burst {
-		font-size: 2.4rem;
+		font-size: var(--text-2xl);
 		line-height: 1;
 	}
 
 	.goal-achieved-title {
 		margin: 0;
 		font-weight: 800;
-		font-size: 1.2rem;
+		font-size: var(--text-md);
 	}
 
 	.goal-achieved-sub {
 		margin: 0.15rem 0 0;
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		opacity: 0.95;
 	}
 
@@ -535,7 +535,7 @@
 	}
 
 	.goal-past-label {
-		font-size: 0.75rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.03em;
@@ -543,7 +543,7 @@
 	}
 
 	.goal-past-chip {
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		background: var(--color-bg-alt);
 		color: var(--color-text);
 		padding: 0.3rem 0.65rem;
@@ -570,7 +570,7 @@
 	}
 
 	h1 {
-		font-size: 1.5rem;
+		font-size: var(--text-lg);
 		color: var(--color-wood-dark);
 	}
 
@@ -582,20 +582,20 @@
 	.back-link {
 		flex-shrink: 0;
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		text-decoration: none;
 		padding: 0.5rem 0;
 	}
 
 	section h2 {
-		font-size: 1.15rem;
+		font-size: var(--text-md);
 		color: var(--color-wood-dark);
 		margin-bottom: 0.75rem;
 	}
 
 	.empty-state {
 		color: var(--color-text-muted);
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 	}
 
 	.user-groups {
@@ -620,7 +620,7 @@
 		height: 36px;
 		border-radius: 50%;
 		background: var(--tile-color);
-		font-size: 1.1rem;
+		font-size: var(--text-md);
 		box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.15);
 	}
 
@@ -653,7 +653,7 @@
 		position: absolute;
 		top: 0.6rem;
 		right: 0.75rem;
-		font-size: 0.72rem;
+		font-size: var(--text-2xs);
 		font-weight: 700;
 		color: var(--color-text);
 		background: var(--color-surface);
@@ -675,7 +675,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 1.4rem;
+		font-size: var(--text-lg);
 	}
 
 	.book-info {
@@ -695,19 +695,19 @@
 	}
 
 	.book-author {
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 
 	.finish-reaction {
 		flex-shrink: 0;
-		font-size: 1.2rem;
+		font-size: var(--text-md);
 		line-height: 1;
 	}
 
 	.finisher-badge {
 		flex-shrink: 0;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		font-weight: 600;
 		color: var(--color-text);
 		background: var(--tile-color);

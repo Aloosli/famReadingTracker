@@ -111,13 +111,13 @@
 	}
 
 	.patch-emoji {
-		font-size: 2.1rem;
+		font-size: var(--text-2xl);
 		filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
 		position: relative;
 	}
 
 	.patch-label {
-		font-size: 0.78rem;
+		font-size: var(--text-xs);
 		font-weight: 700;
 		text-align: center;
 		color: var(--color-text);
@@ -131,11 +131,11 @@
 	}
 
 	.celebration .patch-emoji {
-		font-size: 3.4rem;
+		font-size: var(--text-3xl);
 	}
 
 	.celebration .patch-label {
-		font-size: 1.05rem;
+		font-size: var(--text-md);
 		max-width: none;
 		color: var(--patch-color);
 	}

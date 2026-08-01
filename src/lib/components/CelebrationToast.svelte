@@ -100,13 +100,13 @@
 	}
 
 	.celebration-emoji {
-		font-size: 3rem;
+		font-size: var(--text-3xl);
 	}
 
 	.celebration-message {
 		margin: 0;
 		font-weight: 700;
-		font-size: 1.15rem;
+		font-size: var(--text-md);
 		color: var(--accent);
 	}
 

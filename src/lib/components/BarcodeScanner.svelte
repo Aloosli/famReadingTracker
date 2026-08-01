@@ -133,7 +133,7 @@
 
 	.hint {
 		color: var(--color-text-muted);
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		text-align: center;
 		margin: 0;
 	}
@@ -150,7 +150,7 @@
 		padding: 0.7rem 1.1rem;
 		border-radius: var(--radius-sm);
 		font-weight: 700;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		cursor: pointer;
 	}
 </style>

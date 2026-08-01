@@ -16,7 +16,7 @@
 		background: var(--banner-color);
 		color: #fff;
 		font-weight: 700;
-		font-size: 0.8rem;
+		font-size: var(--text-xs);
 		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 		clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0 50%);
 		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
@@ -24,6 +24,6 @@
 	}
 
 	.title-banner-emoji {
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 	}
 </style>

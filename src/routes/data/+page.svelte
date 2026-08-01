@@ -136,7 +136,7 @@
 		color: var(--color-text-muted);
 		text-decoration: none;
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 	}
 
 	.back:hover {
@@ -160,7 +160,7 @@
 
 	.summary {
 		margin: 0;
-		font-size: 1.05rem;
+		font-size: var(--text-md);
 		color: var(--color-text);
 	}
 
@@ -192,12 +192,12 @@
 	}
 
 	.card-emoji {
-		font-size: 1.6rem;
+		font-size: var(--text-xl);
 	}
 
 	h2 {
 		margin: 0;
-		font-size: 1.2rem;
+		font-size: var(--text-md);
 		color: var(--color-text);
 	}
 
@@ -223,7 +223,7 @@
 		border: 1px solid var(--color-border);
 		color: var(--color-text);
 		font-weight: 700;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		padding: 0.7rem 1.25rem;
 		border-radius: var(--radius-md);
 		text-decoration: none;
@@ -249,7 +249,7 @@
 	}
 
 	.file-input {
-		font-size: 0.9rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 		max-width: 100%;
 	}
@@ -283,7 +283,7 @@
 	.restore-confirm p {
 		margin: 0;
 		color: var(--color-text);
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 		line-height: 1.5;
 	}
 
@@ -297,7 +297,7 @@
 	.restore-note {
 		margin: 0;
 		font-weight: 600;
-		font-size: 0.95rem;
+		font-size: var(--text-base);
 	}
 
 	.restore-note.ok {
@@ -310,7 +310,7 @@
 
 	.footnote {
 		margin: 0;
-		font-size: 0.85rem;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 </style>
