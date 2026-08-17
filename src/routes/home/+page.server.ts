@@ -1,7 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { getUserById, updateMonthlyGoal, updateUserProfile } from '$lib/server/db/users';
+import { updateMonthlyGoal, updateUserProfile } from '$lib/server/db/users';
+import { getProfile, requireProfile } from '$lib/server/guards';
 import { isAvatarColor, isAvatarEmoji } from '$lib/avatars';
-import { updateBookPageCount } from '$lib/server/db/books';
+import { getBookInHousehold, updateBookPageCount } from '$lib/server/db/books';
 import {
 	countFinishedThisMonth,
 	finishEntry,
@@ -68,12 +69,8 @@ function resolveReadAt(readWhen: string | undefined, readTime: string | undefine
 	return candidate > now ? now : candidate;
 }
 
-export const load: PageServerLoad = ({ cookies }) => {
-	const profileId = cookies.get(PROFILE_COOKIE);
-	const user = profileId ? getUserById(Number(profileId)) : undefined;
-	if (!user) {
-		redirect(302, '/');
-	}
+export const load: PageServerLoad = ({ cookies, locals }) => {
+	const user = requireProfile(cookies, locals);
 
 	// A compact read-only view of the family goal so everyone sees the shared bar from their shelf.
 	// (The Family page owns setting it and celebrating when it's reached.)
@@ -119,13 +116,12 @@ export const load: PageServerLoad = ({ cookies }) => {
 };
 
 export const actions: Actions = {
-	switchProfile: async ({ cookies }) => {
+	switchProfile: async ({ cookies, locals }) => {
 		cookies.delete(PROFILE_COOKIE, { path: '/' });
 		redirect(303, '/');
 	},
-	finishBook: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	finishBook: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -141,9 +137,8 @@ export const actions: Actions = {
 		const grants = evaluateTitles(user.id);
 		return { success: true, grants, bests };
 	},
-	unfinishBook: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	unfinishBook: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -158,9 +153,8 @@ export const actions: Actions = {
 		revokeFinishDependentTitles(user.id);
 		return { success: true };
 	},
-	removeBook: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	removeBook: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -174,9 +168,8 @@ export const actions: Actions = {
 		removeEntry(entryId, user.id);
 		return { success: true };
 	},
-	setAsideBook: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	setAsideBook: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -190,9 +183,8 @@ export const actions: Actions = {
 		setAsideEntry(entryId, user.id);
 		return { success: true };
 	},
-	resumeBook: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	resumeBook: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -206,9 +198,8 @@ export const actions: Actions = {
 		resumeEntry(entryId, user.id);
 		return { success: true };
 	},
-	logProgress: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	logProgress: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -220,6 +211,9 @@ export const actions: Actions = {
 
 		if (!bookId || !Number.isFinite(position) || position < 0) {
 			return fail(400, { message: 'Enter a valid position.' });
+		}
+		if (!getBookInHousehold(locals.householdId, bookId)) {
+			return fail(404, { message: "That book isn't on this family's shelf." });
 		}
 		if (positionType === 'percent' && position > 100) {
 			return fail(400, { message: 'Percent must be between 0 and 100.' });
@@ -237,9 +231,8 @@ export const actions: Actions = {
 		const grants = evaluateTitles(user.id);
 		return { success: true, grants, freezeEarned: freeze.earned };
 	},
-	editSession: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	editSession: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -274,9 +267,8 @@ export const actions: Actions = {
 		const grants = evaluateTitles(user.id);
 		return { success: true, grants };
 	},
-	deleteSession: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	deleteSession: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -296,9 +288,8 @@ export const actions: Actions = {
 		revokeSessionDependentTitles(user.id);
 		return { success: true };
 	},
-	checkIn: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	checkIn: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -308,14 +299,16 @@ export const actions: Actions = {
 		if (!bookId) {
 			return fail(400, { message: 'Missing book to check in.' });
 		}
+		if (!getBookInHousehold(locals.householdId, bookId)) {
+			return fail(404, { message: "That book isn't on this family's shelf." });
+		}
 
 		checkInToday(user.id, bookId);
 		const grants = evaluateTitles(user.id);
 		return { success: true, grants };
 	},
-	updatePageCount: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	updatePageCount: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -328,13 +321,15 @@ export const actions: Actions = {
 		if (!bookId) {
 			return fail(400, { message: 'Missing book.' });
 		}
+		if (!getBookInHousehold(locals.householdId, bookId)) {
+			return fail(404, { message: "That book isn't on this family's shelf." });
+		}
 
-		updateBookPageCount(bookId, pageCount);
+		updateBookPageCount(locals.householdId, bookId, pageCount);
 		return { success: true };
 	},
-	setActiveTitle: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	setActiveTitle: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -344,9 +339,8 @@ export const actions: Actions = {
 		applyActiveTitle(user.id, titleKey);
 		return { success: true };
 	},
-	setMonthlyGoal: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	setMonthlyGoal: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -360,9 +354,8 @@ export const actions: Actions = {
 		updateMonthlyGoal(user.id, Math.round(goal));
 		return { success: true };
 	},
-	updateProfile: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	updateProfile: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -385,9 +378,8 @@ export const actions: Actions = {
 		});
 		return { success: true };
 	},
-	startFromWishlist: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	startFromWishlist: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -405,9 +397,8 @@ export const actions: Actions = {
 		}
 		return { success: true };
 	},
-	removeFromWishlist: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	removeFromWishlist: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}
@@ -421,9 +412,8 @@ export const actions: Actions = {
 		removeWishlistItem(wishlistId, user.id);
 		return { success: true };
 	},
-	setReaction: async ({ request, cookies }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+	setReaction: async ({ request, cookies, locals }) => {
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}

@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { getUserById } from '$lib/server/db/users';
+import { requireProfile } from '$lib/server/guards';
 import { getFinishedInYear } from '$lib/server/db/entries';
 import { getPatchesEarnedInYear } from '$lib/server/db/titles';
 import type { PageServerLoad } from './$types';
@@ -20,12 +20,8 @@ const MONTHS = [
 	'December'
 ];
 
-export const load: PageServerLoad = ({ cookies, url }) => {
-	const profileId = cookies.get(PROFILE_COOKIE);
-	const user = profileId ? getUserById(Number(profileId)) : undefined;
-	if (!user) {
-		redirect(302, '/');
-	}
+export const load: PageServerLoad = ({ cookies, locals, url }) => {
+	const user = requireProfile(cookies, locals);
 
 	const requested = url.searchParams.get('year');
 	const year = requested && /^\d{4}$/.test(requested) ? requested : String(new Date().getUTCFullYear());

@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { getAllUsers, getUserById } from '$lib/server/db/users';
+import { getAllUsers } from '$lib/server/db/users';
+import { getProfile, requireProfile } from '$lib/server/guards';
 import { getFamilyCurrentlyReading, getFamilyRecentlyFinished } from '$lib/server/db/entries';
 import { getDisplayTitlesForAllUsers } from '$lib/server/db/titles';
 import {
@@ -15,11 +16,7 @@ import type { Actions, PageServerLoad } from './$types';
 const PROFILE_COOKIE = 'profile_id';
 
 export const load: PageServerLoad = ({ cookies, locals }) => {
-	const profileId = cookies.get(PROFILE_COOKIE);
-	const user = profileId ? getUserById(Number(profileId)) : undefined;
-	if (!user) {
-		redirect(302, '/');
-	}
+	const user = requireProfile(cookies, locals);
 
 	// Family goal: work out live progress, and the moment it's reached, retire it to the mementos
 	// list and flag the win so the page can celebrate once.
@@ -43,7 +40,7 @@ export const load: PageServerLoad = ({ cookies, locals }) => {
 		readers: getAllUsers(locals.householdId),
 		currentlyReading: getFamilyCurrentlyReading(locals.householdId),
 		recentlyFinished: getFamilyRecentlyFinished(locals.householdId),
-		displayTitles: getDisplayTitlesForAllUsers(),
+		displayTitles: getDisplayTitlesForAllUsers(locals.householdId),
 		goal,
 		justAchieved,
 		pastGoals: getPastGoals(locals.householdId)
@@ -52,8 +49,7 @@ export const load: PageServerLoad = ({ cookies, locals }) => {
 
 export const actions: Actions = {
 	setGoal: async ({ request, cookies, locals }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		if (!profileId || !getUserById(Number(profileId))) {
+		if (!getProfile(cookies, locals)) {
 			return fail(401, { message: 'Pick a profile first.' });
 		}
 
@@ -75,8 +71,7 @@ export const actions: Actions = {
 		return { success: true };
 	},
 	clearGoal: async ({ cookies, locals }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		if (!profileId || !getUserById(Number(profileId))) {
+		if (!getProfile(cookies, locals)) {
 			return fail(401, { message: 'Pick a profile first.' });
 		}
 		clearActiveGoal(locals.householdId);

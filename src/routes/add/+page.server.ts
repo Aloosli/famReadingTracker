@@ -1,5 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { getUserById } from '$lib/server/db/users';
+import { getProfile, requireProfile } from '$lib/server/guards';
 import { findOrCreateBook } from '$lib/server/db/books';
 import { startReading, addAlreadyRead } from '$lib/server/db/entries';
 import { addToWishlist, removeFromWishlistByBook } from '$lib/server/db/wishlist';
@@ -15,20 +15,15 @@ function toDestination(value: string | null | undefined): Destination {
 	return DESTINATIONS.includes(value as Destination) ? (value as Destination) : 'reading';
 }
 
-export const load: PageServerLoad = ({ cookies, url }) => {
-	const profileId = cookies.get(PROFILE_COOKIE);
-	const user = profileId ? getUserById(Number(profileId)) : undefined;
-	if (!user) {
-		redirect(302, '/');
-	}
+export const load: PageServerLoad = ({ cookies, locals, url }) => {
+	const user = requireProfile(cookies, locals);
 	// Only the initial selection — the page offers all three.
 	return { user, destination: toDestination(url.searchParams.get('to')) };
 };
 
 export const actions: Actions = {
 	addBook: async ({ request, cookies, locals }) => {
-		const profileId = cookies.get(PROFILE_COOKIE);
-		const user = profileId ? getUserById(Number(profileId)) : undefined;
+		const user = getProfile(cookies, locals);
 		if (!user) {
 			return fail(401, { message: 'No active profile — pick one first.' });
 		}

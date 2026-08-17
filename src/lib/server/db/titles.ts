@@ -187,15 +187,16 @@ export function getPatchesForUser(userId: number): PatchInfo[] {
 }
 
 /** The active display title for every user that has one, keyed by user_id. */
-export function getDisplayTitlesForAllUsers(): Map<number, DisplayableUserTitle> {
+export function getDisplayTitlesForAllUsers(householdId: number): Map<number, DisplayableUserTitle> {
 	const rows = db
 		.prepare(
 			`SELECT ut.*, t.label, t.emoji, t.color, t.description
 			 FROM user_titles ut
 			 JOIN titles t ON t.key = ut.title_key
-			 WHERE ut.is_active = 1 AND (ut.expires_at IS NULL OR ut.expires_at > datetime('now'))`
+			 WHERE ut.is_active = 1 AND (ut.expires_at IS NULL OR ut.expires_at > datetime('now'))
+			   AND ut.user_id IN (SELECT id FROM users WHERE household_id = ?)`
 		)
-		.all() as DisplayableUserTitle[];
+		.all(householdId) as DisplayableUserTitle[];
 	return new Map(rows.map((row) => [row.user_id, row]));
 }
 

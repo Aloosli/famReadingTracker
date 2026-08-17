@@ -64,9 +64,25 @@ export function createBook(householdId: number, input: BookInput): BookRow {
 	return db.prepare('SELECT * FROM books WHERE id = ?').get(result.lastInsertRowid) as BookRow;
 }
 
+/**
+ * The household-scoped book lookup. A book id arriving from a form is a claim, not a fact: without
+ * this, a foreign id let a reader write sessions against another family's book, whose title, author
+ * and cover then rendered on their own shelf (every shelf query joins books). Use this before
+ * touching any book id that came from a request.
+ */
+export function getBookInHousehold(householdId: number, bookId: number): BookRow | undefined {
+	return db.prepare('SELECT * FROM books WHERE id = ? AND household_id = ?').get(bookId, householdId) as
+		| BookRow
+		| undefined;
+}
+
 /** Lets a reader correct the page count later (e.g. a different physical edition). */
-export function updateBookPageCount(bookId: number, pageCount: number | null): void {
-	db.prepare('UPDATE books SET page_count = ? WHERE id = ?').run(pageCount, bookId);
+export function updateBookPageCount(householdId: number, bookId: number, pageCount: number | null): void {
+	db.prepare('UPDATE books SET page_count = ? WHERE id = ? AND household_id = ?').run(
+		pageCount,
+		bookId,
+		householdId
+	);
 }
 
 /**

@@ -9,7 +9,7 @@ import { requireProfile } from '$lib/server/guards';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = (event) => {
-	const user = requireProfile(event);
+	const user = requireProfile(event.cookies, event.locals);
 	return { summary: getBackupSummary(user.household_id) };
 };
 
@@ -20,7 +20,7 @@ export const actions: Actions = {
 	 * everyone's data. It now replaces only the requesting household's rows.
 	 */
 	restore: async (event) => {
-		const user = requireProfile(event);
+		const user = requireProfile(event.cookies, event.locals);
 		const data = await event.request.formData();
 		const file = data.get('backup');
 

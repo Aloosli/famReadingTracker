@@ -1,5 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { countBooksForUser, deleteUser, getAllUsers, getUserById } from '$lib/server/db/users';
+import { countBooksForUser, deleteUser, getAllUsers, getUserInHousehold } from '$lib/server/db/users';
+import { getProfile } from '$lib/server/guards';
 import { getDisplayTitlesForAllUsers } from '$lib/server/db/titles';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -13,11 +14,12 @@ export const load: PageServerLoad = ({ cookies, locals }) => {
 		redirect(302, '/setup');
 	}
 
-	const profileId = cookies.get(PROFILE_COOKIE);
-	if (profileId && getUserById(Number(profileId))) {
+	// A remembered profile only counts if it belongs to this household — otherwise a stale or
+	// forged cookie would bounce someone straight into another family's shelf.
+	if (getProfile(cookies, locals)) {
 		redirect(302, '/home');
 	}
-	const displayTitles = getDisplayTitlesForAllUsers();
+	const displayTitles = getDisplayTitlesForAllUsers(locals.householdId);
 	return {
 		users: users.map((user) => ({
 			...user,
@@ -28,10 +30,10 @@ export const load: PageServerLoad = ({ cookies, locals }) => {
 };
 
 export const actions: Actions = {
-	select: async ({ request, cookies }) => {
+	select: async ({ request, cookies, locals }) => {
 		const data = await request.formData();
 		const userId = Number(data.get('userId'));
-		if (!userId || !getUserById(userId)) {
+		if (!userId || !getUserInHousehold(locals.householdId, userId)) {
 			return fail(400, { message: 'Pick a profile to continue.' });
 		}
 		cookies.set(PROFILE_COOKIE, String(userId), {
@@ -42,10 +44,12 @@ export const actions: Actions = {
 		});
 		redirect(303, '/home');
 	},
-	retireReader: async ({ request, cookies }) => {
+	retireReader: async ({ request, cookies, locals }) => {
 		const data = await request.formData();
 		const userId = Number(data.get('userId'));
-		if (!userId || !getUserById(userId)) {
+		// S5: without the household check this deleted any reader in any family, cascading away
+		// their entries, sessions, freezes, wishlist and titles.
+		if (!userId || !getUserInHousehold(locals.householdId, userId)) {
 			return fail(400, { message: 'Pick a reader to remove.' });
 		}
 

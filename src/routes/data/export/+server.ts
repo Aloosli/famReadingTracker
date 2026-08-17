@@ -21,7 +21,7 @@ function today(): string {
 export const GET: RequestHandler = (event) => {
 	// A backup is the most sensitive thing the app can emit — never serve one to a bare GET from
 	// someone with no profile at all.
-	const user = requireProfile(event);
+	const user = requireProfile(event.cookies, event.locals);
 	const format = event.url.searchParams.get('format') === 'db' ? 'db' : 'json';
 
 	if (format === 'db') {

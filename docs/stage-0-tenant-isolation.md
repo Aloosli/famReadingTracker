@@ -110,28 +110,36 @@ auth design below.
 so a forged id can't steer a handler across tenants. That is a consistency check, not a boundary.
 It becomes a real boundary once `locals.householdId` comes from a signed session.
 
-### ⬜ S4 — `getUserById(id)` is not household-scoped
+### ✅ S4 — `getUserById(id)` is not household-scoped
 
 `src/lib/server/db/users.ts`. The entry point of every authenticated route — 25 call sites across
 four route files. `getUserInHousehold(householdId, id)` now exists beside it and is what
 `requireProfile` uses; folding the remaining 25 sites onto it is the next step.
 
-### ⬜ S5 — `retireReader` deletes any reader in any household
+**Fixed 2026-08-16:** `getUserById` is *deleted*, not deprecated — leaving an unscoped lookup around is how the next handler quietly reintroduces the hole. Every route resolves its reader through `getProfile` / `requireProfile` in `$lib/server/guards`, which go via `getUserInHousehold`.
+
+### ✅ S5 — `retireReader` deletes any reader in any household
 
 `src/routes/+page.server.ts`. Validates that the user *exists*, not that they're yours.
 `deleteUser()` cascades to their entries, sessions, freezes, wishlist and titles.
 
-### ⬜ S6 — `updateBookPageCount(bookId, …)` is unscoped
+**Fixed 2026-08-16:** `retireReader` and `select` validate through `getUserInHousehold`, so a userId from a form can only ever name a reader in the requesting household.
+
+### ✅ S6 — `updateBookPageCount(bookId, …)` is unscoped
 
 `books.ts`, called from `home/+page.server.ts` with a `bookId` straight off the form.
 
-### ⬜ S7 — Book ids from forms are never checked against the household
+**Fixed 2026-08-16:** `updateBookPageCount` takes a `householdId` and filters on it, so the UPDATE cannot reach another family's row even if the caller forgot to guard.
+
+### ✅ S7 — Book ids from forms are never checked against the household
 
 `home/+page.server.ts` — log progress, check in, page count. A foreign `bookId` writes a
 `reading_sessions` row for (your user, their book); every shelf query joins `books`, so their
 book's title, author and cover then render on your page. A cross-tenant read via a write.
 
-### ⬜ S8 — `getDisplayTitlesForAllUsers()` scans all households
+**Fixed 2026-08-16:** new `getBookInHousehold` guards every form-supplied `bookId` — log progress, check in and page-count edits reject a foreign id with a 404 before touching anything.
+
+### ✅ S8 — `getDisplayTitlesForAllUsers()` scans all households
 
 `titles.ts`. Currently benign — the result is a Map keyed by `user_id`, only looked up for users
 already fetched by household — but it is a global scan one refactor away from leaking, and it is on
@@ -221,6 +229,8 @@ let the compiler find every call site. After that, `user.household_id` should ne
 | 4 | `requireBook` guard; scope `retireReader`, `updateBookPageCount`, `getDisplayTitlesForAllUsers` (S5–S8) | 1 evening |
 | 5 | Cross-tenant test suite | 1 weekend |
 
+**Fixed 2026-08-16:** takes a `householdId` and filters `user_id IN (SELECT id FROM users WHERE household_id = ?)`.
+
 ### The test suite is the deliverable that lasts
 
 `vitest` is wired up, but note the existing convention: `db/index.ts` opens a real SQLite file at
@@ -254,3 +264,23 @@ dev server run against the copy, and:
 | `GET /data/export?format=json` as household 1 | 200, zero occurrences of the other family's data |
 | `POST /data?/restore` of household 1's backup | household 2's users, books, entries, sessions, goals and freezes all still present |
 | `POST /data?/restore` of a v1-shaped file | accepted, no data loss |
+
+**Route isolation, verified 2026-08-16** the same way — a copy of the dev database seeded with a
+second household (reader id 3, book id 8), dev server driven against it:
+
+| Check | Result |
+|---|---|
+| Cookie naming household 2's reader, on `/home` `/family` `/year` `/add` | 302 → picker, all four |
+| Legitimate cookie on the same pages | 200 |
+| Profile picker rendering the other household's reader | 0 occurrences |
+| `?/retireReader` targeting the foreign user | blocked — user still exists |
+| `?/logProgress` against the foreign book | blocked — 0 sessions written |
+| `?/checkIn` against the foreign book | blocked — 0 sessions written |
+| `?/updatePageCount` against the foreign book | blocked — page_count unchanged |
+| `?/updatePageCount` against **my own** book | **succeeded** — the guards don't over-block |
+
+One trap worth recording: the first run of the page-count test used a wrong action name
+(`setPageCount` vs the real `updatePageCount`) and 404'd without ever reaching the guard — a false
+pass. When testing a form action, confirm the action name exists, or you are testing SvelteKit's
+router rather than your own code. The same reason the last row matters: a guard that blocks
+everything looks identical to a guard that works, until you check the legitimate case too.

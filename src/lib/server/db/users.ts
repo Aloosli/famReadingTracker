@@ -7,17 +7,14 @@ export function getAllUsers(householdId: number): UserRow[] {
 		.all(householdId) as UserRow[];
 }
 
-export function getUserById(id: number): UserRow | undefined {
-	return db.prepare('SELECT * FROM users WHERE id = ?').get(id) as UserRow | undefined;
-}
-
 /**
- * The household-scoped lookup: a reader is only found if they belong to the household the request
- * is scoped to. Prefer this over getUserById everywhere — an id arriving from a cookie or a form is
- * a claim, not a fact, and this is what turns it into one.
+ * The only way to look a reader up. A reader is found only if they belong to the household the
+ * request is scoped to — an id arriving from a cookie or a form is a claim, not a fact, and this is
+ * what turns it into one.
  *
- * (getUserById above is still used by routes that predate household scoping; folding them onto this
- * one is the next step — see docs/stage-0-tenant-isolation.md.)
+ * The unscoped `getUserById` that used to sit here is deliberately gone rather than deprecated:
+ * every route now goes through the guards in $lib/server/guards, and leaving an unscoped lookup
+ * around is how the next handler quietly reintroduces the hole.
  */
 export function getUserInHousehold(householdId: number, id: number): UserRow | undefined {
 	return db.prepare('SELECT * FROM users WHERE id = ? AND household_id = ?').get(id, householdId) as
