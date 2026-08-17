@@ -99,7 +99,7 @@ with no error. Found while working out how each table scopes to a household.
 original seven tables are required by `isValidBackup`, and `normalizeBackup` fills the rest with
 empty arrays, which is exactly what a v1 restore did before, minus the silence.
 
-### ⬜ S3 — Identity is a plaintext user id in a cookie
+### ✅ S3 — Identity is a plaintext user id in a cookie
 
 `profile_id=7` means "I am user 7". No signature, no secret, no session. On the family tablet this
 is correct design — picking a profile is a convenience, not a login. On the open internet it is
@@ -109,6 +109,22 @@ auth design below.
 `requireProfile` now at least guarantees the resulting reader is inside the request's household,
 so a forged id can't steer a handler across tenants. That is a consistency check, not a boundary.
 It becomes a real boundary once `locals.householdId` comes from a signed session.
+
+**Fixed 2026-08-17.** `accounts` + `auth_sessions`, scrypt via `node:crypto` (no native dep), and a
+32-byte random token whose **SHA-256 is what gets stored** — a leaked database yields nothing
+replayable. `hooks.server.ts` now derives `locals.householdId` from the session rather than
+`getDefaultHouseholdId()`, which is what turns the guards from a consistency check into a real
+boundary.
+
+The gate lives in hooks, not in routes, so `locals.householdId` stays non-null and none of the 31
+sites fixed the day before needed touching again. Sessions roll for a year and only rewrite once
+they've aged 90% of the way, so the family tablet neither re-asks nor writes to the DB per request.
+
+**The first sign-up claims the existing household** instead of creating an empty one — otherwise
+adding auth to a running install would strand the family's readers and history behind a household
+nobody owns. Every sign-up after that gets a fresh, empty household. The sign-up page names the
+readers it is about to adopt, because "create an account" on an install holding a year of reading
+otherwise looks like it might replace it.
 
 ### ✅ S4 — `getUserById(id)` is not household-scoped
 
@@ -284,3 +300,26 @@ One trap worth recording: the first run of the page-count test used a wrong acti
 pass. When testing a form action, confirm the action name exists, or you are testing SvelteKit's
 router rather than your own code. The same reason the last row matters: a guard that blocks
 everything looks identical to a guard that works, until you check the legitimate case too.
+
+**Accounts, verified 2026-08-17** on a copy of the dev database (a household with readers, no
+accounts), driven end to end:
+
+| Check | Result |
+|---|---|
+| `/` `/home` `/family` `/year` `/add` `/data` `/api/*` while signed out | 303 → `/login`, all seven |
+| `/login` on an install with no accounts | 303 → `/signup` — nobody to sign in as |
+| First sign-up | claimed household 1; readers, books and history intact |
+| Second sign-up | new empty household 2 |
+| Family 2 viewing the picker | **0** of family 1's readers |
+| Family 2, signed in, forging family 1's `profile_id` | 302 → their own picker, every page |
+| Deep link while signed out | `/login?next=%2Fyear`, restored after sign-in |
+| Wrong password | 401; one message for unknown-email and bad-password alike |
+| Sign out | session row deleted, `/home` gated again |
+| Raw session token present in the database | **0 occurrences** — SHA-256 only |
+| Stored passwords | `scrypt$16384$8$1$…`, salted, params carried per hash |
+
+Second trap worth recording: form-action POSTs made with curl come back as
+`{"type":"redirect","status":303,…}` JSON rather than an HTTP redirect, because SvelteKit chooses
+its response shape from the `Accept` header. That reads as a broken redirect. Re-testing with a
+browser-shaped `Accept: text/html` gave the real 303. Test form actions with a browser Accept, or
+you are testing content negotiation rather than your handler.

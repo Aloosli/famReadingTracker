@@ -9,6 +9,35 @@ CREATE TABLE IF NOT EXISTS households (
 	created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- A grown-up's login. One account owns one household; readers are profiles inside it and never get
+-- logins of their own — that is the whole children's-data posture (no child credential, no child
+-- email, no child-facing recovery), so don't add one.
+--
+-- Deliberately NOT in BACKUP_TABLES: a backup holds a family's reading, not their credentials.
+-- Restoring into a fresh install therefore needs a fresh sign-up, which is the safer default —
+-- a leaked backup file can't be turned into a login.
+CREATE TABLE IF NOT EXISTS accounts (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	household_id INTEGER NOT NULL REFERENCES households(id) ON DELETE CASCADE,
+	-- Stored lowercased; UNIQUE is then a real uniqueness guarantee rather than a case-sensitive one.
+	email TEXT NOT NULL UNIQUE,
+	password_hash TEXT NOT NULL,
+	created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_accounts_household ON accounts(household_id);
+
+-- Signed-in sessions. `id` is the SHA-256 of the cookie token, never the token itself: a database
+-- read (a stolen backup, a leaked file) then yields nothing that can be replayed as a login.
+CREATE TABLE IF NOT EXISTS auth_sessions (
+	id TEXT PRIMARY KEY,
+	account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+	expires_at TEXT NOT NULL,
+	created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_auth_sessions_account ON auth_sessions(account_id);
+
 CREATE TABLE IF NOT EXISTS users (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	household_id INTEGER REFERENCES households(id),

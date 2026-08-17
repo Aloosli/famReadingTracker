@@ -89,6 +89,11 @@
 		{#if managing}
 			<a class="add-link" href="/setup">+ Add reader</a>
 			<a class="add-link" href="/data">Data &amp; backup</a>
+			<!-- POST, not a link: a GET sign-out can be triggered by a prefetch or an image tag, and
+			     signing the family tablet out by accident is a genuinely annoying thing to happen. -->
+			<form method="POST" action="/logout">
+				<button type="submit" class="add-link signout">Sign out</button>
+			</form>
 			<button
 				type="button"
 				class="manage-toggle"
@@ -291,6 +296,16 @@
 		color: var(--color-accent);
 		text-decoration: none;
 		padding: var(--space-xs) var(--space-xs);
+	}
+
+	/* The sign-out is a button in a form; match the links beside it rather than looking like a
+	   different kind of control. */
+	.signout {
+		background: none;
+		border: none;
+		font-family: inherit;
+		cursor: pointer;
+		color: var(--color-text-muted);
 	}
 
 	.confirm-backdrop {
