@@ -3,12 +3,27 @@ import { env } from '$env/dynamic/private';
 import { createSession } from '$lib/server/db/accounts';
 import { isFirstRun, signUp } from '$lib/server/db/signup';
 import { evaluateSignupPolicy, needsInviteCode } from '$lib/server/signup-policy';
+import { createRateLimitStore, hit, prune } from '$lib/server/rate-limit';
 import { getAllUsers } from '$lib/server/db/users';
 import { getDefaultHouseholdId } from '$lib/server/db/households';
 import { SESSION_COOKIE } from '../../hooks.server';
 import type { Actions, PageServerLoad } from './$types';
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
+
+/**
+ * Throttles the one unauthenticated write endpoint that faces the internet.
+ *
+ * Keyed on IP only. Keying on email would be useless here — the attacker chooses it, so varying it
+ * would step around the limit — and there is no account to protect from lockout yet.
+ *
+ * Ten in fifteen minutes is generous for a real person mistyping an invite code, and brutal for
+ * guessing one: it caps a brute-force run at about a thousand attempts a day, which turns even a
+ * memorable, human-chosen code into something that will not fall.
+ */
+const SIGNUP_ATTEMPTS = createRateLimitStore();
+const SIGNUP_WINDOW_MS = 15 * 60 * 1000;
+const SIGNUP_PER_IP = 10;
 
 function policyInput(providedCode?: string) {
 	const firstRun = isFirstRun();
@@ -42,7 +57,22 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, url }) => {
+	default: async ({ request, cookies, url, getClientAddress }) => {
+		// The key space is attacker-controlled, so don't let the map grow without bound.
+		prune(SIGNUP_ATTEMPTS);
+		const throttle = hit(
+			SIGNUP_ATTEMPTS,
+			`signup:${getClientAddress()}`,
+			SIGNUP_PER_IP,
+			SIGNUP_WINDOW_MS
+		);
+		if (!throttle.allowed) {
+			return fail(429, {
+				email: '',
+				message: `Too many attempts. Try again in ${Math.ceil(throttle.retryAfter / 60)} minute(s).`
+			});
+		}
+
 		const data = await request.formData();
 		const email = data.get('email')?.toString() ?? '';
 		const password = data.get('password')?.toString() ?? '';
