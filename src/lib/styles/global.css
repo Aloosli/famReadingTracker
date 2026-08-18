@@ -128,6 +128,23 @@
 	color-scheme: light;
 }
 
+/* ---- Small screens ----
+   Every size in this app is a rem token — type and spacing both — so raising the root scales the
+   whole interface proportionally rather than needing a breakpoint per component.
+
+   A percentage, not a pixel value, deliberately: this multiplies whatever text size the reader has
+   set in their browser instead of overriding it. Someone who has already turned text up gets the
+   bump on top, rather than being reset to our idea of readable.
+
+   Kept modest at 6.25% (16px -> 17px). It was tempting to go further, but the app is read by four
+   people with different eyes, and an interface that is too large on a phone just means more
+   scrolling and fewer books visible at once. */
+@media (max-width: 30rem) {
+	html {
+		font-size: 106.25%;
+	}
+}
+
 * {
 	box-sizing: border-box;
 }

@@ -1765,6 +1765,32 @@
 		gap: var(--space-sm);
 	}
 
+	/* ---- Narrow screens ----
+	   The app was laid out on an iPad and merely shrinks to fit a phone. These are the two places
+	   where shrinking isn't enough: the currently-reading actions, and the page badge that shares
+	   the card's top-right corner with them. */
+	@media (max-width: 30rem) {
+		.book-actions {
+			/* Own line, full width — so the buttons lay out against the card rather than against
+			   whatever space the title left behind. */
+			width: 100%;
+		}
+
+		.book-actions :global(button) {
+			/* Share the line evenly instead of one button wrapping alone underneath. */
+			flex: 1 1 auto;
+		}
+
+		/* In flow rather than floating over the row it now sits above. */
+		.progress-label {
+			position: static;
+			align-self: flex-start;
+			box-shadow: none;
+			background: transparent;
+			padding: 0;
+		}
+	}
+
 	.book-item {
 		position: relative;
 		display: flex;
@@ -1844,6 +1870,9 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-xs);
+		/* Three buttons don't fit a phone-width card. Without this they overflowed the card rather
+		   than wrapping, pushing Remove out past the edge and into the progress badge. */
+		flex-wrap: wrap;
 	}
 
 	.finish-button {
