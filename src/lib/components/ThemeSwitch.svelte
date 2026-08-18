@@ -52,13 +52,18 @@
 
 <style>
 	.switch {
-		--seg: 40px;
-		--pad: 5px;
-		--h: 34px;
-		position: fixed;
-		top: calc(1rem + env(safe-area-inset-top));
-		right: calc(1rem + env(safe-area-inset-right));
-		z-index: 50;
+		/* Defaults, but overridable by the .app-chrome group so the whole switch can be scaled from
+		   one place. Set plainly they would win over the parent's values, since a custom property
+		   declared on the element beats an inherited one — and the phone shrink would silently do
+		   nothing. */
+		--seg: var(--switch-seg, 40px);
+		--pad: var(--switch-pad, 5px);
+		--h: var(--switch-h, 34px);
+		/* The sliding stick is absolutely positioned against this element. That worked implicitly
+		   while .switch was `position: fixed`; once positioning moved to the .app-chrome group, the
+		   stick started measuring from there instead and sat a sound-button's width off to the left.
+		   Being the stick's containing block is this element's job regardless of who places it. */
+		position: relative;
 		display: flex;
 		padding: var(--pad);
 		border-radius: 999px;

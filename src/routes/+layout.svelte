@@ -111,7 +111,40 @@
 />
 
 <SonicScenery />
-<SoundToggle />
-<ThemeSwitch />
+<!-- The two floating controls are one group, so they position relative to each other instead of
+     one guessing the other's width. Sizing them is now a single rule rather than two that have to
+     agree. -->
+<div class="app-chrome">
+	<SoundToggle />
+	<ThemeSwitch />
+</div>
 {@render children()}
 <TabBar />
+
+<style>
+	.app-chrome {
+		position: fixed;
+		top: calc(1rem + env(safe-area-inset-top));
+		right: calc(1rem + env(safe-area-inset-right));
+		z-index: 50;
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+	}
+
+	/* On a phone these float over a centred page header, and at the larger root scale they had grown
+	   enough to crowd the avatar beneath them. They are chrome, not content — so they give way. */
+	@media (max-width: 30rem) {
+		.app-chrome {
+			top: calc(0.5rem + env(safe-area-inset-top));
+			right: calc(0.5rem + env(safe-area-inset-right));
+			gap: 0.4rem;
+			/* Read by SoundToggle for its own width/height. */
+			--chrome-size: 36px;
+			/* Shrinks the theme switch's track, stick and segments together. */
+			--switch-seg: 32px;
+			--switch-pad: 4px;
+			--switch-h: 28px;
+		}
+	}
+</style>

@@ -25,14 +25,13 @@
 {/if}
 
 <style>
+	/* Positioning belongs to the .app-chrome group in +layout.svelte, not here. This used to place
+	   itself with `right: calc(1rem + 132px + 0.6rem)` — a hardcoded guess at the theme switch's
+	   width, which silently broke the moment either control changed size. */
 	.sound-toggle {
-		position: fixed;
-		top: calc(1rem + env(safe-area-inset-top));
-		/* Sits to the left of the theme switch pill (~132px wide). */
-		right: calc(1rem + 132px + 0.6rem + env(safe-area-inset-right));
-		z-index: 50;
-		width: 44px;
-		height: 44px;
+		flex-shrink: 0;
+		width: var(--chrome-size, 44px);
+		height: var(--chrome-size, 44px);
 		border-radius: 50%;
 		border: none;
 		background: var(--color-surface);
