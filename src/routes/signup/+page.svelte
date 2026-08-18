@@ -29,9 +29,24 @@
 		</div>
 	{/if}
 
+	{#if data.closedReason && !form?.message}
+		<div class="closed" role="note">
+			<p class="closed-title">Not open for sign-ups</p>
+			<p class="closed-body">{data.closedReason}</p>
+		</div>
+	{/if}
+
 	<form method="POST">
 		{#if form?.message}
 			<p class="error" role="alert">{form.message}</p>
+		{/if}
+
+		{#if data.inviteRequired}
+			<label>
+				Invite code
+				<input type="text" name="invite" autocomplete="off" required />
+				<span class="hint">From whoever runs this server.</span>
+			</label>
 		{/if}
 
 		<label>
@@ -101,6 +116,26 @@
 
 	.subtitle {
 		margin: 0;
+		color: var(--color-text-muted);
+	}
+
+	.closed {
+		padding: var(--space-sm) var(--space-md);
+		border-radius: var(--radius-md);
+		background: var(--color-bg-alt);
+		border-left: 4px solid var(--color-text-muted);
+	}
+
+	.closed-title {
+		margin: 0 0 var(--space-3xs);
+		font-weight: 700;
+		font-size: var(--text-sm);
+		color: var(--color-text);
+	}
+
+	.closed-body {
+		margin: 0;
+		font-size: var(--text-sm);
 		color: var(--color-text-muted);
 	}
 

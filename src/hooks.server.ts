@@ -15,7 +15,7 @@ export const SESSION_COOKIE = 'session';
  * adapter-node they're served before it. Cheaper to allow them in both cases than to have the
  * manifest 302 to /login and break Add to Home Screen.
  */
-const PUBLIC_EXACT = new Set(['/login', '/signup']);
+const PUBLIC_EXACT = new Set(['/login', '/signup', '/healthz']);
 const PUBLIC_PREFIXES = ['/_app/', '/favicon', '/apple-touch-icon', '/manifest', '/icons/'];
 
 function isPublic(pathname: string): boolean {
