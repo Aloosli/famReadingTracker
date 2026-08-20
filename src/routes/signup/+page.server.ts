@@ -3,7 +3,7 @@ import { env } from '$env/dynamic/private';
 import { createSession } from '$lib/server/db/accounts';
 import { isFirstRun, signUp } from '$lib/server/db/signup';
 import { evaluateSignupPolicy, needsInviteCode } from '$lib/server/signup-policy';
-import { createRateLimitStore, hit, prune } from '$lib/server/rate-limit';
+import { clientKey, createRateLimitStore, hit, prune } from '$lib/server/rate-limit';
 import { getAllUsers } from '$lib/server/db/users';
 import { getDefaultHouseholdId } from '$lib/server/db/households';
 import { SESSION_COOKIE } from '../../hooks.server';
@@ -62,7 +62,7 @@ export const actions: Actions = {
 		prune(SIGNUP_ATTEMPTS);
 		const throttle = hit(
 			SIGNUP_ATTEMPTS,
-			`signup:${getClientAddress()}`,
+			`signup:${clientKey(getClientAddress)}`,
 			SIGNUP_PER_IP,
 			SIGNUP_WINDOW_MS
 		);

@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { authenticate, createSession } from '$lib/server/db/accounts';
-import { createRateLimitStore, hit, prune } from '$lib/server/rate-limit';
+import { clientKey, createRateLimitStore, hit, prune } from '$lib/server/rate-limit';
 import { isFirstRun } from '$lib/server/db/signup';
 import { SESSION_COOKIE } from '../../hooks.server';
 import type { Actions, PageServerLoad } from './$types';
@@ -41,7 +41,7 @@ export const actions: Actions = {
 
 		// The key space is attacker-controlled on a public instance, so keep the map from growing.
 		prune(ATTEMPTS);
-		const ip = getClientAddress();
+		const ip = clientKey(getClientAddress);
 		const byIp = hit(ATTEMPTS, `ip:${ip}`, PER_IP, WINDOW_MS);
 		const byEmail = hit(ATTEMPTS, `email:${email.trim().toLowerCase()}`, PER_EMAIL, WINDOW_MS);
 		if (!byIp.allowed || !byEmail.allowed) {

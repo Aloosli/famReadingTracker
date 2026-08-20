@@ -59,3 +59,24 @@ export function prune(store: RateLimitStore, now: number = Date.now()): void {
 		if (now >= bucket.resetAt) store.delete(key);
 	}
 }
+
+/**
+ * The rate-limit key for a request's origin, without letting address resolution take the endpoint
+ * down with it.
+ *
+ * adapter-node's `getClientAddress()` *throws* when ADDRESS_HEADER is configured but the header is
+ * absent — which is every request that doesn't arrive through the proxy: a direct hit on the LAN
+ * address, a container health check, anything bypassing the tunnel. Since the only callers are the
+ * login and sign-up handlers, that turned a missing header into a 500 on both, i.e. nobody can sign
+ * in over the LAN.
+ *
+ * Falling back to a single shared bucket is the conservative direction: unproxied callers are
+ * throttled together rather than not at all, and the endpoint keeps working.
+ */
+export function clientKey(getClientAddress: () => string): string {
+	try {
+		return getClientAddress();
+	} catch {
+		return 'no-address-header';
+	}
+}

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createRateLimitStore, hit, prune } from './rate-limit';
+import { clientKey, createRateLimitStore, hit, prune } from './rate-limit';
 
 const LIMIT = 3;
 const WINDOW = 60_000;
@@ -60,5 +60,29 @@ describe('prune', () => {
 		prune(store, 61_001);
 		expect(store.has('old')).toBe(false);
 		expect(store.has('new')).toBe(true);
+	});
+});
+
+describe('clientKey', () => {
+	it('uses the address when one is available', () => {
+		expect(clientKey(() => '203.0.113.9')).toBe('203.0.113.9');
+	});
+
+	// adapter-node throws when ADDRESS_HEADER is set but the header is absent — every request that
+	// skips the proxy. Unguarded that became a 500 on login and sign-up, so the LAN fallback broke
+	// exactly when the tunnel was down and you needed it.
+	it('falls back instead of throwing when the proxy header is missing', () => {
+		const throwing = () => {
+			throw new Error('Address header was specified with ADDRESS_HEADER=cf-connecting-ip but is absent');
+		};
+		expect(() => clientKey(throwing)).not.toThrow();
+		expect(clientKey(throwing)).toBe('no-address-header');
+	});
+
+	it('puts all unproxied callers in one bucket — throttled together, never unthrottled', () => {
+		const throwing = () => {
+			throw new Error('nope');
+		};
+		expect(clientKey(throwing)).toBe(clientKey(throwing));
 	});
 });
